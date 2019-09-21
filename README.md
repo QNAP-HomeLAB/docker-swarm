@@ -29,35 +29,46 @@ Ports 80 and 443 must be unused on your NAS.  By default QTS used 80 and 443 for
 
 Steps:
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 8.)
-1. Shutdown and remove all Containers:
-  1. Open terminal and run `docker system prune`
-  1. Run `docker network prune` for good measure
-  1. Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
-1. Remove Container Station
-1. Reboot NAS
-1. Install Container Station and launch once installed, creating the Container folder suggested when opening
-1. Create a new user called _dockeruser_
-1. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
+2. Shutdown and remove all Containers:
+  - Open terminal and run `docker system prune`
+  - Run `docker network prune` for good measure
+  - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
+3. Remove Container Station
+4. Reboot NAS
+5. Install Container Station and launch once installed, creating the Container folder suggested when opening
+6. Create a new user called _dockeruser_
+7. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
  - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
  - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
  - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
-1. Run `id dockeruser` in terminal and note the uid and gid
-1. Run `docker network ls`. You should see 3 networks, bridge, host, and null
-1. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
-1. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
-1. Install Entware 1.0 package (Installing qnapclub is easiest way https://www.qnapclub.eu/en/howto/1). This allows you to setup the shortcuts in Steps 20 & 21 by editing your cli profile.
-1.  Run `mkdir /share/appdata/traefik`
-1.  Run `mkdir /share/appdata/config/traefik`
-1.  Run `mkdir /share/runtime/traefik`
-1.  Install nano or vi, whichever you are more comfortable with (e.g. Run `opkg install nano` or `opkg install vim`)
-1.  Run `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
-1.  Add the following lines to the end of the file and save
+8. Run `id dockeruser` in terminal and note the uid and gid
+9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
+10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
+11. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
+12. Install Entware 1.0 package (Installing qnapclub is easiest way https://www.qnapclub.eu/en/howto/1). This allows you to setup the shortcuts in Steps 20 & 21 by editing your cli profile.
+13.  Run `mkdir /share/appdata/traefik`
+14.  Run `mkdir /share/appdata/config/traefik`
+15.  Run `mkdir /share/runtime/traefik`
+16.  Install nano or vi, whichever you are more comfortable with (e.g. Run `opkg install nano` or `opkg install vim`)
+17.  Run `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
+18.  Add the following lines to the end of the file and save
 ```
 dsd() {
 	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
 dsr() {
 	docker stack rm "$1"
+}
+bounce(){
+ docker stack rm "$1"
+ sleep 15
+ docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+}
+dcu(){
+ docker-compose -f /share/appdata/config/"$1"/"$1".yml up -d
+}
+dcd(){
+ docker-compose -f /share/appdata/config/"$1"/"$1".yml down
 }
 dfc() {
 	bash /share/appdata/scripts/folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
@@ -76,8 +87,9 @@ dss() {
 }
 ```
 Remember these shortcut names:
-- **dsd** deploys a single stack - e.g. `dsd plex`
-- **dsr** removes a single stack - e.g. `dsr plex`
+- **dsd** deploys a single stack - e.g. `dsd traefik`
+- **dsr** removes a single stack - e.g. `dsr traefik`
+- **bounce** removes a single stack and recreates it - e.g. `bounce traefik`
 - **dfc** creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). Simplest example: e.g. `dfc plex` would create:
      - /share/appdata/plex
      - /share/appdata/config/plex
@@ -90,39 +102,39 @@ Remember these shortcut names:
 
 ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-22. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
-1. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
-1. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
-2. ``touch acme.json`` in the folder and set permissions to 600
-3. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
-4. Run `dsd traefik` to start the traefik container
-5. Follow _ForwardAuth Setup Steps_ below
-6. Enjoy Traefik and add more containers.
+19. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
+20. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
+21. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
+22. ``touch acme.json`` in the folder and set permissions to 600
+23. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
+24. Run `dsd traefik` to start the traefik container
+25. Follow _ForwardAuth Setup Steps_ below
+26. Enjoy Traefik and add more containers.
 ---
 ### ForwardAuth Setup Steps
 1. Go to https://auth0.com
-1. Sign in or register an account
-1. Note Tenant Domain provided by Auth0
-1. Login or create an account with https://github.com
-1. Goto _Settings -> Developer Settings - OAuth Apps_
-1. Create a new app (call it something to recognise it is linked to Auth0)
-1. Note the client Id and Secret
-1. Add homepage URL as `https://<yourauth0accounthere>.auth0.com/`
-1. Add authorisaiton callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
-1. Go back to Auth0
-1. Go to _Connections -> Social_
-1. Select _Github_ and enter in your Github app ClientID and secret Credentials - **NOTE:** ENSURE _Attribute "Email Address"_ is ticked
-1. Create an application on Auth0 (regular web app)
-1. Use the Auth0 clientID and Client Secret in your _application.yaml_ file
-1. Make sure to specify POST method of token endpoint authentication (Drop down box)
-1. Enter in your Callback URL (`https://<service>.<domain>/signin` & `https://<service>.<domain>/oauth/signin`)
-1. Enter your origin URL (`https://<your URL here>`) and save changes
-1. Go to Users & Roles and Create a user with a real email address.  You will use this later so remember it
-1. Click on _Rules -> Whitelist_
-1. Enter in your email address into the whitelist field (e.g. `Line 8 "const whitelist = [ '<your email here>']; //authorized users"`)
-1. Open ssh and `dsr traefik`, wait 10 seconds and `dsd traefik`
-1. Wait 30 seconds and then launch `https://traefik.<yourdomainhere>`
-1. Enter Auth0 authentication login to reach traefik dashboard
+2. Sign in or register an account
+3. Note Tenant Domain provided by Auth0
+4. Login or create an account with https://github.com
+5. Goto _Settings -> Developer Settings - OAuth Apps_
+6. Create a new app (call it something to recognise it is linked to Auth0)
+7. Note the client Id and Secret
+8. Add homepage URL as `https://<yourauth0accounthere>.auth0.com/`
+9. Add authorisaiton callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
+10. Go back to Auth0
+11. Go to _Connections -> Social_
+12. Select _Github_ and enter in your Github app ClientID and secret Credentials - **NOTE:** ENSURE _Attribute "Email Address"_ is ticked
+13. Create an application on Auth0 (regular web app)
+14. Use the Auth0 clientID and Client Secret in your _application.yaml_ file
+15. Make sure to specify POST method of token endpoint authentication (Drop down box)
+16. Enter in your Callback URL (`https://<service>.<domain>/signin` & `https://<service>.<domain>/oauth/signin`)
+17. Enter your origin URL (`https://<your URL here>`) and save changes
+18. Go to Users & Roles and Create a user with a real email address.  You will use this later so remember it
+19. Click on _Rules -> Whitelist_
+20. Enter in your email address into the whitelist field (e.g. `Line 8 "const whitelist = [ '<your email here>']; //authorized users"`)
+21. Open ssh and `dsr traefik`, wait 10 seconds and `dsd traefik`
+22. Wait 30 seconds and then launch `https://traefik.<yourdomainhere>`
+23. Enter Auth0 authentication login to reach traefik dashboard
 ---
 ### Scripts Setup
 Please create these scripts and save them to `/share/appdata/scripts` if you want to use the cli shortcuts we created in earlier steps.  **NOTE:** `setup_stack.sh` requires you to add your NAS IP for it to work.
