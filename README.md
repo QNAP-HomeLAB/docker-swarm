@@ -1,31 +1,9 @@
 # QNAP-Docker-Swarm-Setup
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
-
-# SWARM SETUP GUIDE
-
-### Document History
-     - Initial Document                              13/Mar/2019
-     - Added more profile shortcuts                  07/Jun/2019
-     - Added Auth0/ForwardAuth instructions          07/Jun/2019
-     - Added scripts to guide                        07/Jun/2019
-     - Added preparation Steps                       13/Jun/2019
-     - Added Special Thanks                          14/Jun/2019
-     - Removed legacy OAuth references               14/Jun/2019
-     - German Translation added                      12/Sep/2019
-     - Optimimization in Codes for better C/P        15/Sep/2019
-
----
-### Special Thanks
-This document originated from taking notes when first setting up my docker swarm. It would not have been possible without **@gkoerk** on the _QNAP Unofficial Forum_ Discord channel (Which I highly recommend you join).
-
-His knowledge, clear instructions, and incredible patience put me on the path of becoming a docker addict, and without his guidance, this guide would not exist.  If this guide helps you out, please remember to send **@gkoerk** some love on the discord channel.
-
-Thanks to **@eJonnyDotCom** from the _QNAP Unofficial Forum_ Discord channel for his feedback and comments on this guide (and spotting my numerous mistakes).  **@eJonnyDotCom** went through the pain and frustrations of missing steps and unclear instructions so you don't have to.
-
----
 ###  Docker Swarm Setup 
 #### Preparation
-Ports 80 and 443 must be unused on your NAS.  By default QTS used 80 and 443 for web login.  Please change this to 9080 and 9443 to ensure no port conflicts with docker stacks.  You will also need to ensure ports 80 and 443 are forwarded from your router to your NAS before we begin.
+- Ports 80 and 443 must be unused on your NAS. By default, QTS assigns both ports to the Web Server application. Please change this (in QNAP GUI Settings, Applications, Web Server) to 9080 and 9443 to ensure no port conflicts with docker stacks. You should consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
+- Ports 80 and 443 must be forwarded from your router to your NAS. This is *possible* using UPNP in the QNAP GUI (), but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
 
 Steps:
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 8.)
