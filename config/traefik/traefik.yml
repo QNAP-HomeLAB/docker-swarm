@@ -18,7 +18,7 @@ services:
       - 8090:8080
     volumes:
        - /var/run/docker.sock:/var/run/docker.sock:ro
-       - /share/appdata/config/traefik:/etc/traefik
+       - /share/appdata/traefik:/etc/traefik
     networks:
       - traefik_public
     deploy:
