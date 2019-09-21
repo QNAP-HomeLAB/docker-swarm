@@ -1,0 +1,81 @@
+version: "3.4"
+
+secrets:
+  namecheap_api_key:
+    file: "/share/appdata/config/secrets/namecheap_api_key.secret"
+
+services:
+  app:
+    image: traefik:latest
+    secrets:
+      - namecheap_api_key    
+    environment:
+      - NAMECHEAP_API_USER=gkoerk
+      - NAMECHEAP_API_KEY=/run/secrets/namecheap_api_key
+    ports:
+      - 80:80
+      - 443:443
+      - 8090:8080
+    volumes:
+       - /var/run/docker.sock:/var/run/docker.sock:ro
+       - /share/appdata/config/traefik:/etc/traefik
+    networks:
+      - traefik_public
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.dashboard.rule=Host(`traefik.gkoerk.com`)"
+        - "traefik.http.routers.dashboard.tls.certresolver=namecheap"
+        - "traefik.http.routers.dashboard.middlewares=secured@file"
+        - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+
+  whoami:
+    image: containous/whoami
+    networks:
+      - traefik_public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.whoami.rule=Host(`whoami.gkoerk.com`)"
+        - "traefik.http.routers.whoami.tls.certresolver=namecheap"
+        - "traefik.http.routers.whoami.middlewares=secured@file"      
+        - "traefik.http.services.whoami.loadbalancer.server.port=80"
+       
+  auth:
+    image: dniel/forwardauth:latest
+    networks:
+      - traefik_public
+    ports:
+      - 8080:8080
+    volumes:
+      - /share/appdata/config/traefik/application.yaml:/config/application.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.auth.rule=Host(`auth.gkoerk.com`)" 
+        - "traefik.http.routers.auth.tls.certresolver=namecheap"
+        - "traefik.http.routers.auth.middlewares=secured@file"
+        - "traefik.http.services.auth.loadbalancer.server.port=8080"          
+        
+  www:
+    image: dniel/blogr-www
+    networks:
+      - traefik_public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.www.rule=Host(`www.gkoerk.com`)"
+        - "traefik.http.routers.www.middlewares=secured@file"      
+        - "traefik.http.routers.www.middlewares=secured@file"      
+        - "traefik.http.services.www.loadbalancer.server.port=80"
+      
+networks:
+  traefik_public:
+    external: true
