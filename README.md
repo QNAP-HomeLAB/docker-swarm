@@ -135,11 +135,11 @@ Remember these shortcut names:
 2. Sign in or register an account
 3. Note Tenant Domain provided by Auth0
 4. Login or create an account with https://github.com
-5. Goto _Settings -> Developer Settings - OAuth Apps_
-6. Create a new app (call it something to recognise it is linked to Auth0)
+5. Go to _Settings -> Developer Settings - OAuth Apps_
+6. Create a new app (call it something to recognize it is linked to Auth0)
 7. Note the client Id and Secret
 8. Add homepage URL as `https://<yourauth0accounthere>.auth0.com/`
-9. Add authorisaiton callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
+9. Add authorization callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
 10. Go back to Auth0
 11. Go to _Connections -> Social_
 12. Select _Github_ and enter in your Github app ClientID and secret Credentials - **NOTE:** ENSURE _Attribute "Email Address"_ is ticked
