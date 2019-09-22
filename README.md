@@ -69,7 +69,7 @@ a0982a1fc7f6        none                   null                local
 
 19.  Add the following lines to the end of the file and save
 
-     ```
+```
 dsd() {
 	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
@@ -102,20 +102,21 @@ dsrms() {
 dss() {
 	bash /share/appdata/scripts/setup_stack.sh
 }
-     ```
+```
      
 Remember these shortcut names:
-   - **dsd** deploys a single stack - e.g. `dsd traefik`
-   - **dsr** removes a single stack - e.g. `dsr traefik`
-   - **bounce** removes a single stack and recreates it - e.g. `bounce traefik`
-   - **dfc** creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). Simplest example: e.g. `dfc plex` would create:
-     - /share/appdata/plex
-     - /share/appdata/config/plex
-     - /share/runtime/plex
-   - **dup** starts existing stacks declared in `/share/appdata/scripts/restart_stack.sh`
-   - **dsp** prunes the docker system.  Any containers or networks not running will be removed -e.g. `dsp`
-   - **dsrms** will remove all stacks, prune the docker system, remove any overlay networks, and leave the swarm - e.g. `dsrms` (use with care!)
-   - **dss** will create a new swarm, create a new overlay network, start all stacks declared in `/share/appdata/scripts/setup_stack.sh`
+- **dsd** deploys a single stack - e.g. `dsd traefik`
+- **dsr** removes a single stack - e.g. `dsr traefik`
+- **bounce** removes a single stack and recreates it - e.g. `bounce traefik`
+- **dfc** creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). Simplest example: e.g. `dfc plex` would create:
+  - /share/appdata/plex
+  - /share/appdata/config/plex
+  - /share/runtime/plex
+- **dup** starts existing stacks declared in `/share/appdata/scripts/restart_stack.sh`
+- **dsp** prunes the docker system.  Any containers or networks not running will be removed -e.g. `dsp`
+- **dsrms** will remove all stacks, prune the docker system, remove any overlay networks, and leave the swarm - e.g. `dsrms` (use with care!)
+- **dss** will create a new swarm, create a new overlay network, start all stacks declared in `/share/appdata/scripts/setup_stack.sh`
+
 ** See below for scripts that need to be created and added to `/share/appdata/scripts` folder
 
 ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
