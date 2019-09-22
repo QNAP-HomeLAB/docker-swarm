@@ -23,22 +23,13 @@ Steps:
 9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
 11. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
-12. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`? The networks should match the following (except the generated NETWORK ID):
-```[~] # docker network ls
-NETWORK ID          NAME                   DRIVER              SCOPE
-c4419b39cef0        bridge                 bridge              local
-637ba589dd70        docker_gwbridge        bridge              local
-5bd5c1601ef7        host                   host                local
-kr4kpxr5a72x        ingress                overlay             swarm
-a0982a1fc7f6        none                   null                local
-```
-**Important: If your configuration is lacking a docker_gwbridge or differs from this list, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.**
+
 13. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile. 
-	- The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
-	- If you don't need the walkthrough, add the repository. (For English, go to App Center, Settings, App Repository, Add, `https://www.qnapclub.eu/en/repo.xml`).
-	- If you have trouble locating the correct package below, the correct description begins `entware-3x and entware-ng merged to become entware.` The working link (as of publication) is here: https://www.qnapclub.eu/en/qpkg/556. If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
-	- Search for `entware-std` and install that package. 
-	**Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.** 
+- The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
+- If you don't need the walkthrough, add the repository. (For English, go to App Center, Settings, App Repository, Add, `https://www.qnapclub.eu/en/repo.xml`).
+- If you have trouble locating the correct package below, the correct description begins `entware-3x and entware-ng merged to become entware.` The working link (as of publication) is here: https://www.qnapclub.eu/en/qpkg/556. If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
+- Search for `entware-std` and install that package. 
+**Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.** 
 14.  Run `mkdir -p /share/appdata/traefik`
 15.  Run `mkdir -p /share/appdata/config/traefik`
 16.  Run `mkdir -p /share/runtime/traefik`
