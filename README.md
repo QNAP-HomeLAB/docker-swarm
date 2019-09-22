@@ -7,7 +7,7 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 
 Steps:
 
-1. Backup what you have running now (if you don't have anything running yet, skip to Step 3 or 5.)
+1. Backup what you have running now (if you don't have anything running yet, skip to Step 3 or 5)
 
 2. Shutdown and remove all Containers:
    - Open terminal and run `docker system prune`
