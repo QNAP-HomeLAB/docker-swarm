@@ -121,14 +121,14 @@ Remember these shortcut names:
 
 ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-19. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
-20. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
-21. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
-22. ``touch acme.json`` in the folder and set permissions to 600
-23. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
-24. Run `dsd traefik` to start the traefik container
-25. Follow _ForwardAuth Setup Steps_ below
-26. Enjoy Traefik and add more containers.
+20. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
+21. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
+22. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
+23. ``touch acme.json`` in the folder and set permissions to 600
+24. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
+25. Run `dsd traefik` to start the traefik container
+26. Follow _ForwardAuth Setup Steps_ below
+27. Enjoy Traefik and add more containers.
 ---
 ### ForwardAuth Setup Steps
 1. Go to https://auth0.com
