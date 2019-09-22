@@ -34,10 +34,10 @@ services:
         # Terminate SSL, whoami doesnt listen on SSL traffic, whoami is listening on plain text unencrypted http connections.
         # https://docs.traefik.io/v2.0/routing/routers/#tls
         - "traefik.enable=true"
+        - "traefik.http.routers.dashboard.entrypoints=https"
         - "traefik.http.routers.dashboard.rule=Host(`traefik.gkoerk.com`)"
         - "traefik.http.routers.dashboard.tls.certresolver=namecheap"
         - "traefik.http.routers.dashboard.middlewares=forward-auth@file"
-        - "traefik.http.routers.dashboard.entrypoints=https"
         - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
 
   whoami:
@@ -47,9 +47,9 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
+        - "traefik.http.routers.whoami.entrypoints=https"
         - "traefik.http.routers.whoami.rule=Host(`whoami.gkoerk.com`)"
         - "traefik.http.routers.whoami.tls.certresolver=namecheap"
-        - "traefik.http.routers.whoami.entrypoints=https"
         - "traefik.http.routers.whoami.middlewares=forward-auth@file"      
        
   auth:
@@ -68,9 +68,9 @@ services:
           memory: 256M
       labels:
         - "traefik.enable=true"
+        - "traefik.http.routers.auth.entrypoints=https"
         - "traefik.http.routers.auth.rule=Host(`auth.gkoerk.com`)" 
         - "traefik.http.routers.auth.tls.certresolver=namecheap"
-        - "traefik.http.routers.auth.entrypoints=https"
         - "traefik.http.routers.auth.middlewares=forward-auth@file"
         
   www:
@@ -80,10 +80,11 @@ services:
     deploy:
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.www.rule=Host(`www.gkoerk.com`)"
-        - "traefik.http.routers.www.middlewares=forward-auth@file"   
         - "traefik.http.routers.www.entrypoints=https"
-      
+        - "traefik.http.routers.www.rule=Host(`www.gkoerk.com`)"
+        - "traefik.http.routers.www.tls.certresolver=namecheap"        
+        - "traefik.http.routers.www.middlewares=forward-auth@file"   
+
 networks:
   traefik_public:
     external: true
