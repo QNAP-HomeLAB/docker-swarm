@@ -6,23 +6,35 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 - Ports 80 and 443 must be forwarded from your router to your NAS. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
 
 Steps:
+
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 3 or 5.)
+
 2. Shutdown and remove all Containers:
-- Open terminal and run `docker system prune`
-- Run `docker network prune` for good measure
-- Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
+   - Open terminal and run `docker system prune`
+   - Run `docker network prune` for good measure
+   - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
+
 3. Remove Container Station
+
 4. Reboot NAS
+
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
+
 6. Create a new user called _dockeruser_
+
 7. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
-- `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
-- `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
-- `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
+   - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
+   - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
+   - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
+
 8. Run `id dockeruser` in terminal and note the uid and gid
+
 9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
+
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
+
 11. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
+
 12. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`? 
 The networks should match the following (except the generated NETWORK ID):
 
@@ -36,20 +48,28 @@ a0982a1fc7f6        none                   null                local
 ```
 
 **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault. 
+
 13. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile. 
-- The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
-- If you don't need the walkthrough, add the repository. (For English, go to App Center, Settings, App Repository, Add, `https://www.qnapclub.eu/en/repo.xml`).
-- If you have trouble locating the correct package below, the correct description begins `entware-3x and entware-ng merged to become entware.` The working link (as of publication) is here: https://www.qnapclub.eu/en/qpkg/556. If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
-- Search for `entware-std` and install that package. 
-**Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.** 
+    - The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
+    - If you don't need the walkthrough, add the repository. (For English, go to App Center, Settings, App Repository, Add, `https://www.qnapclub.eu/en/repo.xml`).
+    - If you have trouble locating the correct package below, the correct description begins `entware-3x and entware-ng merged to become entware.` The working link (as of publication) is here: https://www.qnapclub.eu/en/qpkg/556. If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
+    - Search for `entware-std` and install that package. 
+
+**Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.**
+
 14.  Run `mkdir -p /share/appdata/traefik`
+
 15.  Run `mkdir -p /share/appdata/config/traefik`
+
 16.  Run `mkdir -p /share/runtime/traefik`
+
 17.  Install nano or vi, whichever you are more comfortable with (e.g. Run `opkg install nano` or `opkg install vim`)
+
 18.  Run `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
+
 19.  Add the following lines to the end of the file and save
 
-```
+     ```
 dsd() {
 	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
@@ -82,7 +102,8 @@ dsrms() {
 dss() {
 	bash /share/appdata/scripts/setup_stack.sh
 }
-```
+     ```
+     
 Remember these shortcut names:
    - **dsd** deploys a single stack - e.g. `dsd traefik`
    - **dsr** removes a single stack - e.g. `dsr traefik`
