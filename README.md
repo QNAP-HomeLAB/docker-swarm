@@ -8,17 +8,17 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 Steps:
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 8.)
 2. Shutdown and remove all Containers:
-  - Open terminal and run `docker system prune`
-  - Run `docker network prune` for good measure
-  - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
+   - Open terminal and run `docker system prune`
+   - Run `docker network prune` for good measure
+   - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
 3. Remove Container Station
 4. Reboot NAS
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
 6. Create a new user called _dockeruser_
 7. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
- - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
- - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
- - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
+  - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
+  - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
+  - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
 8. Run `id dockeruser` in terminal and note the uid and gid
 9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
