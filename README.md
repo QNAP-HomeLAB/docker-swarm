@@ -8,17 +8,17 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 Steps:
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 8.)
 2. Shutdown and remove all Containers:
-   - Open terminal and run `docker system prune`
-   - Run `docker network prune` for good measure
-   - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
+    - Open terminal and run `docker system prune`
+    - Run `docker network prune` for good measure
+    - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
 3. Remove Container Station
 4. Reboot NAS
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
 6. Create a new user called _dockeruser_
 7. Create the following folder shares and give _dockeruser_ Read/Write permissions:  
-  - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
-  - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
-  - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
+   - `/share/appdata` - Here we will add a folder <stack name>. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>/AppData` in Windows.
+   - `/share/appdata/config` - Here we will also add a folder <stack name>. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
+   - `/share/runtime` - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
 8. Run `id dockeruser` in terminal and note the uid and gid
 9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
@@ -30,6 +30,7 @@ Steps:
 16.  Install nano or vi, whichever you are more comfortable with (e.g. Run `opkg install nano` or `opkg install vim`)
 17.  Run `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
 18.  Add the following lines to the end of the file and save
+
 ```
 dsd() {
 	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
@@ -65,17 +66,17 @@ dss() {
 }
 ```
 Remember these shortcut names:
-- **dsd** deploys a single stack - e.g. `dsd traefik`
-- **dsr** removes a single stack - e.g. `dsr traefik`
-- **bounce** removes a single stack and recreates it - e.g. `bounce traefik`
-- **dfc** creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). Simplest example: e.g. `dfc plex` would create:
+   - **dsd** deploys a single stack - e.g. `dsd traefik`
+   - **dsr** removes a single stack - e.g. `dsr traefik`
+   - **bounce** removes a single stack and recreates it - e.g. `bounce traefik`
+   - **dfc** creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). Simplest example: e.g. `dfc plex` would create:
      - /share/appdata/plex
      - /share/appdata/config/plex
      - /share/runtime/plex
-- **dup** starts existing stacks declared in `/share/appdata/scripts/restart_stack.sh`
-- **dsp** prunes the docker system.  Any containers or networks not running will be removed -e.g. `dsp`
-- **dsrms** will remove all stacks, prune the docker system, remove any overlay networks, and leave the swarm - e.g. `dsrms` (use with care!)
-- **dss** will create a new swarm, create a new overlay network, start all stacks declared in `/share/appdata/scripts/setup_stack.sh`
+   - **dup** starts existing stacks declared in `/share/appdata/scripts/restart_stack.sh`
+   - **dsp** prunes the docker system.  Any containers or networks not running will be removed -e.g. `dsp`
+   - **dsrms** will remove all stacks, prune the docker system, remove any overlay networks, and leave the swarm - e.g. `dsrms` (use with care!)
+   - **dss** will create a new swarm, create a new overlay network, start all stacks declared in `/share/appdata/scripts/setup_stack.sh`
 ** See below for scripts that need to be created and added to `/share/appdata/scripts` folder
 
 ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
