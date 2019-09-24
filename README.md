@@ -29,7 +29,13 @@ Steps:
 
 8. Run `id dockeruser` in terminal and note the uid and gid
 
-9. Run `docker network ls`. You should see 3 networks, bridge, host, and null
+9. Run `docker network ls`. You should see 3 networks, bridge, host, and none
+
+```[~] # docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+c2ff8c5e622a        bridge              bridge              local
+e1c5ac96bf94        host                host                local
+afc6cb6a54ac        none                null                local
 
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
 
