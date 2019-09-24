@@ -29,13 +29,13 @@ Steps:
 
 8. Run `id dockeruser` in terminal and note the uid and gid
 
-9. Run `docker network ls`. You should see 3 networks, bridge, host, and none
+9. Run `docker network ls`. The networks should match the following (except the generated NETWORK ID):
 
 ```[~] # docker network ls
 NETWORK ID          NAME                DRIVER              SCOPE
-c2ff8c5e622a        bridge              bridge              local
-e1c5ac96bf94        host                host                local
-afc6cb6a54ac        none                null                local
+XXXXXXXXXXXX        bridge              bridge              local
+XXXXXXXXXXXX        host                host                local
+XXXXXXXXXXXX        none                null                local
 ```
 
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
@@ -47,11 +47,11 @@ The networks should match the following (except the generated NETWORK ID):
 
 ```[~] # docker network ls
 NETWORK ID          NAME                   DRIVER              SCOPE
-c4419b39cef0        bridge                 bridge              local
-637ba589dd70        docker_gwbridge        bridge              local
-5bd5c1601ef7        host                   host                local
-kr4kpxr5a72x        ingress                overlay             swarm
-a0982a1fc7f6        none                   null                local
+XXXXXXXXXXXX        bridge                 bridge              local
+XXXXXXXXXXXX        docker_gwbridge        bridge              local
+XXXXXXXXXXXX        host                   host                local
+XXXXXXXXXXXX        ingress                overlay             swarm
+XXXXXXXXXXXX        none                   null                local
 ```
 
 **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault. 
