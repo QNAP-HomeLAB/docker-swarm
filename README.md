@@ -2,8 +2,23 @@
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
 ###  Docker Swarm Setup
 #### Preparation
-- Ports 80 and 443 must be unused on your NAS. By default, QTS assigns both ports to the Web Server application. Please change this (in QNAP GUI Settings, Applications, Web Server) to 9080 and 9443 to ensure no port conflicts with docker stacks. You should consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
+- **Ports 80, 443, and 8080 must be unused by your NAS**. By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide. Modify these ports as follows to ensure there will be no port conflicts with docker stacks:
+  - In QNAP GUI, General Settings, Applications, Web Server, change the default HTTP port to `8081`, and the default HTTPS port to `8443`.
+  - In QNAP GUI, General Settings change the default HTTP port to `8081`, and the default HTTPS port to `9443`. 
+  - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - Ports 80 and 443 must be forwarded from your router to your NAS. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
+
+In sum:
+
+**QTS Default System ports to be modified:**
+
+- 8080 >> 8081
+- 443 >> 8443
+
+**QTS Web Server application ports to be modified:**
+
+- 80 >> 9081
+- 8443 >> 9443
 
 Steps:
 
