@@ -13,9 +13,17 @@ services:
       - NAMECHEAP_API_USER=gkoerk
       - NAMECHEAP_API_KEY=/run/secrets/namecheap_api_key
     ports:
-      - 80:80
-      - 443:443
-      - 8090:8080
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
     volumes:
        - /var/run/docker.sock:/var/run/docker.sock:ro
        - /share/appdata/config/traefik:/etc/traefik
