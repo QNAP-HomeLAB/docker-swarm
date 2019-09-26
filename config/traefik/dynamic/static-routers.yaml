@@ -1,0 +1,63 @@
+## dynamic configuration
+# /etc/traefik/dynamic/static-routers.yml
+
+# Define all static (non-Docker) routers here.
+
+http:
+  routers:
+    gkoerk:
+      entryPoints:
+        - https
+      middlewares:
+        - forward-auth
+      service: noop
+      rule: Host(`gkoerk.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.gkoerk.com"
+            sans:
+              - gkoerk.com
+              
+    gknas:
+      entryPoints:
+        - https
+      middlewares:
+        - forward-auth
+      service: gknas
+      rule: Host(`gknas.gkoerk.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.gkoerk.com"
+            sans:
+              - gkoerk.com              
+
+    qnapunofficial:
+      entryPoints:
+        - https
+      middlewares:
+        - forward-auth
+      service: noop
+      rule: Host(`qnapunofficial.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.qnapunofficial.com"
+            sans:
+              - qnapunofficial.com
+
+    oracleoptimizer:
+      entryPoints:
+        - https
+      middlewares:
+        - forward-auth
+      service: noop
+      rule: Host(`oracleoptimizer.com`)
+      tls:
+        certResolver: namecheap
+        domains:
+          - main: "*.oracleoptimizer.com"
+            sans:
+              - oracleoptimizer.com
+       

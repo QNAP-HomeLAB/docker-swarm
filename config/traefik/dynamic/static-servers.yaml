@@ -1,0 +1,15 @@
+## dynamic configuration
+# /etc/traefik/dynamic/static-servers.yml
+# Define all static (non-Docker) servers here.
+
+http:
+  services:
+    noop:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1"
+
+    gknas:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.100:8880"

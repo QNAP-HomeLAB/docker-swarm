@@ -1,0 +1,15 @@
+# /etc/traefik/dynamic/auth.yaml
+## dynamic configuration
+
+# forward auth
+
+http:
+  middlewares:
+    forward-auth:
+      forwardAuth:
+        address: "http://192.168.200.20:8080/authorize"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - X-FORWARDAUTH-NAME
+          - X-FORWARDAUTH-SUB
+          - X-FORWARDAUTH-EMAIL

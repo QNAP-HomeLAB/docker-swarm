@@ -1,0 +1,10 @@
+# /etc/traefik/dynamic/basic-auth.yaml
+## dynamic configuration
+# basic auth
+
+http:
+  middlewares:
+    basic-user:
+      basicAuth:
+        users: 
+          - "admin:$2y$14$0ZWX1puKFqixMVsZWFgZ2eyDJLJ/7GEUUSUvjRvUO2z4BAwk8lwfC"

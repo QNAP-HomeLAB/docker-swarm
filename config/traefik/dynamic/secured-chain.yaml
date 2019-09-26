@@ -1,0 +1,11 @@
+# /etc/traefik/dynamic/secured-chain.yaml
+## dynamic configuration
+# secured middleware chain
+
+http:
+  middlewares:
+    secured:
+      chain:
+        middlewares:
+          - https-redirect
+          - forward-auth

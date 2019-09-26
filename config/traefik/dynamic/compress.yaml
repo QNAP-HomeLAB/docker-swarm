@@ -1,0 +1,8 @@
+# /etc/traefik/dynamic/compress.yaml
+## dynamic configuration
+# add compression
+
+http:
+  middlewares:
+    compress:
+      compress: {}

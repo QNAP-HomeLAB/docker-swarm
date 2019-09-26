@@ -1,0 +1,15 @@
+## dynamic configuration
+# /etc/traefik/dynamic/globalredirect.yml
+
+# Globally redirects all http traffic to https
+
+http:
+  routers:
+    https-redirect:
+      entryPoints:
+        - http
+      middlewares:
+        - https-redirect
+      service: noop
+      rule: "HostRegexp(`{host:[a-z-.]+}`)"
+	  
