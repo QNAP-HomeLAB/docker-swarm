@@ -8,7 +8,7 @@ services:
   app:
     image: traefik:latest
     secrets:
-      - namecheap_api_key    
+      - namecheap_api_key
     environment:
       - NAMECHEAP_API_USER=gkoerk
       - NAMECHEAP_API_KEY=/run/secrets/namecheap_api_key
@@ -22,23 +22,29 @@ services:
         protocol: tcp
         mode: host
       - target: 8080
-        published: 8080
+        published: 8090
         protocol: tcp
+        mode: host
     volumes:
        - /var/run/docker.sock:/var/run/docker.sock:ro
-       - /share/appdata/config/traefik:/etc/traefik
+       - /share/appdata/traefik:/etc/traefik
     networks:
       - traefik_public
+    command: --configFile=/etc/traefik/traefik-static.yaml
     deploy:
       placement:
         constraints: [node.role == manager]
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.dashboard.entrypoints=https"
-        - "traefik.http.routers.dashboard.rule=Host(`traefik.gkoerk.com`)"
-        - "traefik.http.routers.dashboard.tls.certresolver=namecheap"
-        - "traefik.http.routers.dashboard.middlewares=forward-auth@file"
-        - "traefik.http.services.dashboard.loadbalancer.server.port=8080"        
+        - "traefik.http.routers.traefik.entrypoints=https"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.gkoerk.com`)"
+        - "traefik.http.routers.traefik.tls.certresolver=namecheap"
+        - "traefik.http.routers.traefik.middlewares=forward-auth@file"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+#        - "traefik.http.routers.api.rule=PathPrefix(`/api`)||PathPrefix(`/dashboard`)"
+#        - "traefik.http.routers.api.service=api@internal"
+#        - "traefik.http.routers.api.tls.certresolver=namecheap"
+#        - "traefik.http.routers.api.middlewares=forward-auth@file"
 
   whoami:
     image: containous/whoami
@@ -46,13 +52,13 @@ services:
       - traefik_public
     deploy:
       labels:
-        - "traefik.enable=true"      
+        - "traefik.enable=true"
         - "traefik.http.routers.whoami.entrypoints=https"
         - "traefik.http.routers.whoami.rule=Host(`whoami.gkoerk.com`)"
         - "traefik.http.routers.whoami.tls.certresolver=namecheap"
-        - "traefik.http.services.whoami.loadbalancer.server.port=80"         
-        - "traefik.http.routers.whoami.middlewares=forward-auth@file" 
- 
+        - "traefik.http.routers.whoami.middlewares=forward-auth@file"
+        - "traefik.http.services.whoami.loadbalancer.server.port=80"
+
   auth:
     image: dniel/forwardauth:latest
     networks:
@@ -68,26 +74,26 @@ services:
         reservations:
           memory: 256M
       labels:
-        - "traefik.enable=true"        
+        - "traefik.enable=true"
         - "traefik.http.routers.auth.entrypoints=https"
-        - "traefik.http.routers.auth.rule=Host(`auth.gkoerk.com`)" 
+        - "traefik.http.routers.auth.rule=Host(`auth.gkoerk.com`)"
         - "traefik.http.routers.auth.tls.certresolver=namecheap"
         - "traefik.http.routers.auth.middlewares=forward-auth@file"
-        - "traefik.http.services.auth.loadbalancer.server.port=8080"         
-        
+        - "traefik.http.services.auth.loadbalancer.server.port=8080"
+
   www:
     image: dniel/blogr-www
     networks:
       - traefik_public
     deploy:
       labels:
-        - "traefik.enable=true"         
+        - "traefik.enable=true"
         - "traefik.http.routers.www.entrypoints=https"
         - "traefik.http.routers.www.rule=Host(`www.gkoerk.com`)"
-        - "traefik.http.routers.www.tls.certresolver=namecheap"        
-        - "traefik.http.routers.www.middlewares=forward-auth@file"  
-        - "traefik.http.services.www.loadbalancer.server.port=80"          
-      
+        - "traefik.http.routers.www.tls.certresolver=namecheap"
+        - "traefik.http.routers.www.middlewares=forward-auth@file"
+        - "traefik.http.services.www.loadbalancer.server.port=80"
+
 networks:
   traefik_public:
     external: true
