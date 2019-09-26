@@ -18,7 +18,7 @@ In sum:
 **QTS Web Server application ports to be modified:**
 
 - 80 >> 9081
-- 8443 >> 9443
+- 8081 >> 9443
 
 Steps:
 
