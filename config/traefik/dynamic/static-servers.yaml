@@ -1,6 +1,7 @@
-## dynamic configuration
-# /etc/traefik/dynamic/static-servers.yml
-# Define all static (non-Docker) servers here.
+# Traefik Dynamic Configuration
+# Services: Static (Non-Docker) Services
+# Host Path: /share/appdata/config/traefik/dynamic/static-servers.yaml
+# Internal Path: /etc/traefik/dynamic/static-servers.yaml
 
 http:
   services:
