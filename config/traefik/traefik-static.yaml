@@ -30,16 +30,18 @@ entryPoints:
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
-    #Alternative endpoint: "tcp://127.0.0.1:2375"
+    # Alternative endpoint:
+    # endpoint: "tcp://127.0.0.1:2375"
     watch: true
     swarmMode: true
     network: traefik_public
-    #Optional defaultRule: "Host(`{{ .Name }}.localhost`)"
+    # Optional defaultRule: "Host(`{{ .Name }}.localhost`)"
     useBindPortIP: false
     exposedByDefault: false
 
   file:
-    #Optional instead of directory: filename: /etc/traefik/traefik-dynamic.yaml
+    # Optional instead of directory: 
+    # filename: /etc/traefik/traefik-dynamic.yaml
     directory: /etc/traefik/dynamic
     watch: true
     debugLogGeneratedTemplate: true
@@ -64,7 +66,7 @@ ping:
   entryPoint: ping
 
 log:
-  level: DEBUG
+  level: ERROR
   filePath: "/etc/traefik/traefik.log"
 
 accessLog:
@@ -75,7 +77,8 @@ certificatesResolvers:
     acme:
       email: "gkoerk@gmail.com"
       storage: "/etc/traefik/acme.json"
-      #Alternative ACME Staging CA Server (not ratelimited like prod): caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      # Alternative ACME Staging CA Server (not ratelimited like prod): 
+      # caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
         provider: namecheap
         delayBeforeCheck: 0
