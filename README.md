@@ -6,7 +6,7 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
   - **Change default System ports:** In QNAP GUI, General Settings change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
   - **Change default Web Application ports:** In QNAP GUI, General Settings, Applications, Web Server, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
   - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
-- Ports 80 and 443 must be forwarded from your router to your NAS. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
+- **Ports 80 and 443 must be forwarded from your router to your NAS**. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
 
 In sum:
 
