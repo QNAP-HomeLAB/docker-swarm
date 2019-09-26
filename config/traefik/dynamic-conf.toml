@@ -1,0 +1,58 @@
+[http]
+ [http.routers]
+   [http.routers.https-redirect]
+	  entrypoints = ["http"]
+	  rule = "HostRegexp(`{host:[a-z-.]+}`)"
+	  middlewares = ["https-redirect"]
+	  service = "noop" 
+
+    [http.routers.gkoerk]
+      rule = "Host(`gkoerk.com`)"
+ 	  entrypoints = ["https"]
+ 	  middlewares = ["forward-auth"]
+      service = "noop"
+ 	  [http.routers.gkoerk.tls]
+ 	    certResolver = "namecheap"
+ 	    [[http.routers.gkoerk.tls.domains]]
+ 		  main = "*.gkoerk.com"
+ 		  sans = ["gkoerk.com"]  
+ 	  
+    [http.routers.qnapunofficial]
+      rule = "Host(`qnapunofficial.com`)"
+ 	  entrypoints = ["https"]
+ 	  middlewares = ["forward-auth"]
+      service = "noop"
+ 	  [http.routers.qnapunofficial.tls]
+ 	    certResolver = "namecheap"
+ 	    [[http.routers.qnapunofficial.tls.domains]]
+ 		  main = "*.qnapunofficial.com"
+ 		  sans = ["qnapunofficial.com"] 
+
+    [http.routers.oracleoptimizer]
+      rule = "Host(`oracleoptimizer.com`)"
+ 	  entrypoints = ["https"]
+ 	  middlewares = ["forward-auth"]
+      service = "noop"
+ 	  [http.routers.oracleoptimizer.tls]
+ 	    certResolver = "namecheap"
+ 	    [[http.routers.oracleoptimizer.tls.domains]]
+ 		  main = "*.oracleoptimizer.com"
+ 		  sans = ["oracleoptimizer.com"] 
+
+  [http.middlewares]
+    [http.middlewares.https-redirect.redirectScheme]
+      scheme = "https"
+    [http.middlewares.compress.compress]
+    [http.middlewares.forward-auth.forwardAuth]
+      address = "http://192.168.1.100:8080/authorize"
+      authResponseHeaders = ["X-FORWARDAUTH-NAME", "X-FORWARDAUTH-SUB", "X-FORWARDAUTH-EMAIL"]
+    [http.middlewares.basic-user.basicAuth]
+      users = ["admin:<bcrypt password from htpasswd command>"]	  
+    [http.middlewares.secured.chain]
+      middlewares = ["https-redirect", "forward-auth"]
+
+  [http.services]
+    [http.services.noop]
+      [http.services.noop.loadBalancer]
+        [[http.services.noop.loadBalancer.servers]]
+          url = "http://127.0.0.1"
