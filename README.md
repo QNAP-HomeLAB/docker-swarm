@@ -1,6 +1,7 @@
-# QNAP-Docker-Swarm-Setup
+# QNAP Docker Swarm Setup
+
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
-###  Docker Swarm Setup
+
 #### Preparation
 - **Ports 80, 443, and 8080 must be unused by your NAS**. By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide. Modify these ports as follows to ensure there will be no port conflicts with docker stacks:
   - **Change default System ports:** In QNAP GUI, General Settings change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
@@ -55,9 +56,7 @@ XXXXXXXXXXXX        none                null                local
 
 10. Run `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas IP
 
-11. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
-
-12. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
+11. **Checkpoint:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
 The networks should match the following (except the generated NETWORK ID):
 
 ```[~] # docker network ls
@@ -70,6 +69,8 @@ XXXXXXXXXXXX        none                   null                local
 ```
 
 **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
+
+12. Run `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
 13. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile.
     - The preferred way to do this is to add the QNAP Club Repository to the App Center. Follow the [walkthrough instructions here](https://www.qnapclub.eu/en/howto/1). Note that I use the English translation of the QNAP Club website, but you may change languages (and urls) in the upper right language dropdown.
