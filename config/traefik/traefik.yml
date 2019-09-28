@@ -11,7 +11,7 @@ services:
       - namecheap_api_key
     environment:
       - NAMECHEAP_API_USER=gkoerk
-      - NAMECHEAP_API_KEY=/run/secrets/namecheap_api_key
+      - NAMECHEAP_API_KEY_FILE=/run/secrets/namecheap_api_key
     ports:
       - target: 80
         published: 80
