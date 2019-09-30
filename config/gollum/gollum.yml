@@ -1,3 +1,5 @@
+# Gollum Wiki Recipe
+# /share/appdata/config/gollum/gollum.yml
 version: "3.4"
 
 services:
