@@ -1,3 +1,5 @@
+# Wetty Recipe
+# /share/appdata/config/wetty/wetty.yml
 version: "3.4"
 
 services:
