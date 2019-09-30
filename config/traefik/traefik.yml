@@ -1,3 +1,5 @@
+# Traefik 2.0 Recipe
+# /share/appdata/config/traefik/traefik.yml
 version: "3.4"
 
 secrets:
@@ -26,6 +28,7 @@ services:
         protocol: tcp
         mode: host
     volumes:
+       - /etc/timezone:/etc/timezone:ro
        - /var/run/docker.sock:/var/run/docker.sock:ro
        - /share/appdata/traefik:/etc/traefik
     networks:
@@ -41,10 +44,6 @@ services:
         - "traefik.http.routers.traefik.tls.certresolver=namecheap"
         - "traefik.http.routers.traefik.middlewares=forward-auth@file"
         - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-#        - "traefik.http.routers.api.rule=PathPrefix(`/api`)||PathPrefix(`/dashboard`)"
-#        - "traefik.http.routers.api.service=api@internal"
-#        - "traefik.http.routers.api.tls.certresolver=namecheap"
-#        - "traefik.http.routers.api.middlewares=forward-auth@file"
 
   whoami:
     image: containous/whoami
@@ -64,7 +63,10 @@ services:
     networks:
       - traefik_public
     ports:
-      - 8080:8080
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
     volumes:
       - /share/appdata/config/traefik/application.yaml:/config/application.yaml
     deploy:
