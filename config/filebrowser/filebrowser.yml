@@ -1,3 +1,5 @@
+# Filebrowser Recipe
+# /share/appdata/config/filebrowser/filebrowser.yml
 version: "3.4"
 
 services:
