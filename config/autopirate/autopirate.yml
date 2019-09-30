@@ -166,7 +166,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.lidarr.entrypoints=https"
-        - "traefik.http.routers.lidarr.rule=Host(`heimdall.gkoerk.com`)"
+        - "traefik.http.routers.lidarr.rule=Host(`lidarr.gkoerk.com`)"
         - "traefik.http.routers.lidarr.tls.certresolver=namecheap"
         - "traefik.http.routers.lidarr.middlewares=forward-auth@file"
         - "traefik.http.services.lidarr.loadbalancer.server.port=8686"       
