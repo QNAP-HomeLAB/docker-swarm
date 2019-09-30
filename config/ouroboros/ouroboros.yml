@@ -1,3 +1,5 @@
+# ouroboros Recipe
+# /share/appdata/config/ouroboros/ourobors.yml
 version: "3.4"
 
 services:
@@ -7,7 +9,7 @@ services:
       - CLEANUP=true
       - INTERVAL=300
       - SELF_UPDATE=true
-      - TZ=Europe/Vienna
+      - TZ=America/Chicago
       - NOTIFIERS=discord://https://discordapp.com/api/<thelinkfromdiscord> tgram://<bot>
       - SWARM=true
       - SKIP_STARTUP_NOTIFICATIONS=true
