@@ -1,4 +1,6 @@
-version: "3.0"
+# Plex Recipe
+# /share/appdata/config/plex/plex.yml
+version: "3.4"
 
 services:
   plex:
@@ -26,6 +28,7 @@ services:
     networks:
       - traefik_public        
     volumes:
+      - /etc/timezone:/etc/timezone:ro
       - /share/appdata/plex:/config
       - /share/media:/data
       - /share/runtime/plex/transcode:/transcode
