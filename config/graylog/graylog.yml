@@ -1,47 +1,12 @@
+# Graylog Recipe
+# /share/appdata/config/graylog/graylog.yml
 version: "3.4"
-services:
-  mongo:
-    image: mongo:4.0
-    volumes:
-      - /share/runtime/graylog/db:/data/db
-    networks:
-      - internal
-    logging:
-      driver: gelf
-      options:
-         gelf-address: udp://192.168.1.100:12201
-         labels: database,mongo,graylog
-         tag: "graylogmongo"
-# forElastic search working properly use this command in CLI "sysctl -w vm.max_map_count=262144"
-  elasticsearch:
-    image: elasticsearch:6.8.3
-    ports:
-      - 9200:9200
-    volumes:
-      - /share/runtime/graylog/es_data:/usr/share/elasticsearch/data
-    networks:
-      - internal
-    env_file: /share/appdata/config/graylog/graylog.env
-    deploy:
-      resources:
-        limits:
-           # This has to be _more_ than 512MB, else Elasticsearch will die in a ball of OOM errors
-          memory: 2048M
-        reservations:
-           # This has to be _more_ than 512MB, else Elasticsearch will die in a ball of OOM errors
-          memory: 1024M
-#    logging:
-#      driver: gelf
-#      options:
-#         gelf-address: udp://192.168.1.100:12201
-#         labels: elasticsearch,graylog          
-#         tag: "graylogelasticsearch"
-# since graylog has back support to elasticsearch 5.0 many false logs are spamming graylog
 
+services:
   graylog:
     image: graylog/graylog:3.1
     volumes:
-# chown both folders to PID 1100 and GID 100 or you get an error that graylog can't chown the folder to work properly
+# chown both folders below to PID 1100 and GID 100 or you get an error that graylog can't chown the folder to work properly
       - /share/appdata/graylog/journal:/usr/share/graylog/data/journal
       - /share/appdata/graylog/config:/etc/graylog/server
     env_file: /share/appdata/config/graylog/graylog.env
@@ -65,15 +30,40 @@ services:
           # This has to be _more_ than 512MB, else Graylog will die in a ball of OOM errors
           memory: 2048M
       labels:
-        - com.ouroboros.enable=true
         - "traefik.enable=true"
         - "traefik.http.routers.graylog.entrypoints=https"
         - "traefik.http.routers.graylog.rule=Host(`graylog.gkoerk.com`)"
         - "traefik.http.routers.graylog.middlewares=forward-auth@file"
         - "traefik.http.routers.graylog.tls.certresolver=namecheap"
         - "traefik.http.services.graylog.loadbalancer.server.Port=9000"  
-#    only necessary if your docker host DNS suffix points to a domain with a wildcard A record (graylog tries to lookup "elasticsearch.<yourdomain>", instead of using docker service discovery)
+# only necessary if your docker host DNS suffix points to a domain with a wildcard A record (graylog tries to lookup "elasticsearch.<yourdomain>", instead of using docker service discovery)
     dns_search: gkoerk.com
+    
+  mongo:
+    image: mongo:4.0
+    volumes:
+      - /share/runtime/graylog/db:/data/db
+    networks:
+      - internal
+
+# forElastic search working properly use this command in CLI "sysctl -w vm.max_map_count=262144"
+  elasticsearch:
+    image: elasticsearch:6.8.3
+    ports:
+      - 9200:9200
+    volumes:
+      - /share/runtime/graylog/es_data:/usr/share/elasticsearch/data
+    networks:
+      - internal
+    env_file: /share/appdata/config/graylog/graylog.env
+    deploy:
+      resources:
+        limits:
+           # This has to be _more_ than 512MB, else Elasticsearch will die in a ball of OOM errors
+          memory: 2048M
+        reservations:
+           # This has to be _more_ than 512MB, else Elasticsearch will die in a ball of OOM errors
+          memory: 1024M
 
 networks:
   traefik_public:
