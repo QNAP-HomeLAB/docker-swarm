@@ -20,7 +20,7 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.calibre.entrypoints=https"
-        - "traefik.http.routers.calibre.rule=Host(`calibre.gkoerk.com`)"
+        - "traefik.http.routers.calibre.rule=Host(`library.gkoerk.com`)"
         - "traefik.http.routers.calibre.tls.certresolver=namecheap"
         - "traefik.http.routers.calibre.middlewares=forward-auth@file"
         - "traefik.http.services.calibre.loadbalancer.server.port=8083"
