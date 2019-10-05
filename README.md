@@ -4,7 +4,7 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 
 #### Preparation
 - **Ports 80, 443, and 8080 must be unused by your NAS**. By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide. Modify these ports as follows to ensure there will be no port conflicts with docker stacks:
-  - **Change default System ports:** In QNAP GUI, General Settings change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
+  - **Change default System ports:** In QNAP GUI, General Settings change the default HTTP port to `8880`, and the default HTTPS port to `8443`.
   - **Change default Web Application ports:** In QNAP GUI, General Settings, Applications, Web Server, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
   - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - **Ports 80 and 443 must be forwarded from your router to your NAS**. This is *possible* using UPNP in the QNAP GUI, but **this is not recommended. Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
@@ -100,8 +100,17 @@ dsr() {
 	docker stack rm "$1"
 }
 bounce(){
+ limit=15
  docker stack rm "$1"
- sleep 15
+  until [ -z "$(docker service ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
+   sleep 1;
+   limit="$((limit-1))"
+  done
+ limit=15  
+  until [ -z "$(docker network ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
+   sleep 1;
+   limit="$((limit-1))"
+  done
  docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
 dcu(){
