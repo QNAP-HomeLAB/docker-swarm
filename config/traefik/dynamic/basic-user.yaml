@@ -1,7 +1,7 @@
 # Traefik Dynamic Configuration
 # Middleware: Basic Authentication
-# Host Path: /share/appdata/config/traefik/dynamic/basic-auth.yaml
-# Internal Path: /etc/traefik/dynamic/basic-auth.yaml
+# Host Path: /share/appdata/config/traefik/dynamic/basic-user.yaml
+# Internal Path: /etc/traefik/dynamic/basic-user.yaml
 
 http:
   middlewares:
