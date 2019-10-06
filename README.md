@@ -159,6 +159,7 @@ Remember these shortcut names:
 21. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
 22. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
 23. Create and correctly set permissions on the acme.json file:
+ - `rm /share/appdata/config/traefik/acme.json`
  - `touch /share/appdata/config/traefik/acme.json` 
  - `chmod 600 /share/appdata/config/traefik/acme.json`
 24. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
