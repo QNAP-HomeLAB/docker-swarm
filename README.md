@@ -158,7 +158,9 @@ Remember these shortcut names:
 20. Edit _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7&8 (If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file)
 21. Edit _traefik.yml_ and _traefik.toml_ to include your domain name
 22. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
-23. ``touch acme.json`` in the folder and set permissions to 600
+23. Create and correctly set permissions on the acme.json file:
+ - `touch /share/appdata/config/traefik/acme.json` 
+ - `chmod 600 /share/appdata/config/traefik/acme.json`
 24. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
 25. Run `dsd traefik` to start the traefik container
 26. Follow _ForwardAuth Setup Steps_ below
