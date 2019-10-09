@@ -30,9 +30,12 @@ Steps:
    - Run `docker network prune` for good measure
    - Run `docker swarm leave --force` (just to be sure you don't have a swarm left hanging around)
 
-3. Remove Container Station
+3. Remove Container Station:
+   - In App Center, click the dropdown for Container Station and choose `Remove`
+   - In Control Panel, Shared Folders, check the box next to the `Container` shared folder and click "Remove"  ([example](https://i.imgur.com/s1jXNNs.png))
+   - In the pop-up box, check "Also delete the data" and click "Yes" ([example](https://i.imgur.com/WXML3fl.png))
 
-4. Reboot NAS
+4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png))
 
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
 
@@ -160,7 +163,7 @@ Remember these shortcut names:
 22. Add the provided 3 traefik files to `/share/appdata/config/traefik` (.yml, .toml, .env)
 23. Create and correctly set permissions on the acme.json file:
  - `rm /share/appdata/config/traefik/acme.json`
- - `touch /share/appdata/config/traefik/acme.json` 
+ - `touch /share/appdata/config/traefik/acme.json`
  - `chmod 600 /share/appdata/config/traefik/acme.json`
 24. Check `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
 25. Run `dsd traefik` to start the traefik container
