@@ -50,7 +50,7 @@ Steps:
    - In Control Panel, Shared Folders, check the box next to the `Container` shared folder and click "Remove"  ([example](https://i.imgur.com/s1jXNNs.png))
    - In the pop-up box, check "Also delete the data" and click "Yes" ([example](https://i.imgur.com/WXML3fl.png))
 
-4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png)
+4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png))
 
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
 
