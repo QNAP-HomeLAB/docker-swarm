@@ -1,7 +1,17 @@
-<head>
 <a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+
 <img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay">
-</head>
+
+Please consider donating above to support the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd).
+
+**Benefits** 
+- Community Supporter role in Discord: Priority assistance with any issues.
+- Access to my private Gitlab repository of existing Docker Swarm recipes
+- Request & Vote on new recipes to publish
+- Read access to my personal eBook library.
+- Access to and advice on new properties for QNAP Unofficial: (i.e. Subreddit, Blog, Wiki, FAQs, CI/CD, Community Docker images, etc.)
+
+---------------------------------------
 
 # QNAP Docker Swarm Setup
 
