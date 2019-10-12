@@ -1,6 +1,6 @@
-<a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a> 😢
+<a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
 
-<img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay"> 
+<img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay">
 
 Please consider donating above to support the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd).
 **Benefits** 
