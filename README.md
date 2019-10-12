@@ -98,6 +98,9 @@ XXXXXXXXXXXX        none                   null                local
 
 **Important: DO NOT CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.**
 
+14. Open Control Panel, Privilege, Shared Folders
+ - Create one shared folder named 
+
 14.  Run `mkdir -p /share/appdata/traefik`
 
 15.  Run `mkdir -p /share/appdata/config/traefik`
@@ -202,6 +205,8 @@ Remember these shortcut names:
 14. Use the Auth0 clientID and Client Secret in your _application.yaml_ file
 15. Make sure to specify POST method of token endpoint authentication (Drop down box)
 16. Enter in your Callback URL (`https://<service>.<domain>/signin` & `https://<service>.<domain>/oauth/signin`)
+ - For an entire domain, the values should look like this example:
+ 
 17. Enter your origin URL (`https://<your URL here>`) and save changes
 18. Go to Users & Roles and Create a user with a real email address.  You will use this later so remember it
 19. Click on _Rules -> Whitelist_
