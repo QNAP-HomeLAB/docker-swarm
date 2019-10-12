@@ -1,6 +1,13 @@
-<html><a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a><img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay"></html>
+<span><a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a> <img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay"></span>
 
-Please consider supporting the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) and gain access to existing and new Docker Swarm recipes as they are published! 
+Please consider Donating above to support the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd).
+**Benefits** 
+- Community Supporter role in Discord: Priority assistance with any issues.
+- Access to my private Gitlab repository of existing Docker Swarm recipes
+- Request & Vote on new recipes to publish
+- Read access to my personal eBook library.
+- Access to and advice on new properties for QNAP Unofficial: (i.e. Subreddit, Blog, Wiki, FAQs, CI/CD, Community Docker images, etc.)
+---------------------------------------
 
 # QNAP Docker Swarm Setup
 
@@ -39,7 +46,7 @@ Steps:
    - In Control Panel, Shared Folders, check the box next to the `Container` shared folder and click "Remove"  ([example](https://i.imgur.com/s1jXNNs.png))
    - In the pop-up box, check "Also delete the data" and click "Yes" ([example](https://i.imgur.com/WXML3fl.png))
 
-4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png))
+4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png)
 
 5. Install Container Station and launch once installed, creating the Container folder suggested when opening
 
