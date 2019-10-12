@@ -1,3 +1,8 @@
+<head>
+<a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a>
+<img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay">
+</head>
+
 # QNAP Docker Swarm Setup
 
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
