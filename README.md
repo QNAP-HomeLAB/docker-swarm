@@ -1,6 +1,4 @@
-<html><img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay"></html>
-
-<html><a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a></html>
+<html><a href="https://liberapay.com/gkoerk/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg"></a><img src="http://img.shields.io/liberapay/patrons/gkoerk.svg?logo=liberapay"></html>
 
 Please consider supporting the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) and gain access to existing and new Docker Swarm recipes as they are published! 
 
