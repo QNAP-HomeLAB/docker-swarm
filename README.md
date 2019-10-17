@@ -16,7 +16,6 @@ Please consider donating above to support the [QNAP Unofficial Discord](https://
 # QNAP Docker Swarm Setup
 
 A guide for configuring the docker swarm stack on QNAP devices with Container Station
-
 ---
 
 ## 1 - Preparation
@@ -38,7 +37,6 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 - QTS Web Server application ports should be:
   - HTTP : 9880
   - HTTPS: 9443
-
 ---
 
 ## 2 - Container Station Steps
@@ -77,7 +75,6 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
   - Search for `entware-std` and install that package.
 
   **Important: *DO NOT* CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.**
-
 ---
 
 ## 3 - QNAP CLI Steps
@@ -128,27 +125,27 @@ XXXXXXXXXXXX        none                   null                local
 
 ```
 dfc() {
-	bash /share/appdata/scripts/folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+    bash /share/appdata/scripts/folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
 }
 dup() {
-	bash /share/appdata/scripts/restart_stack.sh
+    bash /share/appdata/scripts/restart_stack.sh
 }
 dsd() {
-	docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+    docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
 dsr() {
-	docker stack rm "$1"
+    docker stack rm "$1"
 }
 dss() {
-	bash /share/appdata/scripts/setup_stack.sh
+    bash /share/appdata/scripts/setup_stack.sh
 }
 dsp() {
-	bash docker system prune -f
+    bash docker system prune -f
 }
 dsrms() {
-	bash /share/appdata/scripts/remove_stack.sh
+    bash /share/appdata/scripts/remove_stack.sh
 }
-bounce(){
+bounce() {
  limit=15
  docker stack rm "$1"
   until [ -z "$(docker service ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
@@ -162,11 +159,11 @@ bounce(){
   done
  docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
 }
-dcu(){
- docker-compose -f /share/appdata/config/"$1"/"$1".yml up -d
+dcu() {
+    docker-compose -f /share/appdata/config/"$1"/"$1".yml up -d
 }
-dcd(){
- docker-compose -f /share/appdata/config/"$1"/"$1".yml down
+dcd() {
+    docker-compose -f /share/appdata/config/"$1"/"$1".yml down
 }
 ```
 
@@ -193,7 +190,6 @@ Remember these shortcut names, (defined by the above code-snippet):
   ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
 **See below** for scripts that need to be created and added to `/share/appdata/scripts` folder
-
 ---
 
 ## 4 - Traefik Setup Steps
@@ -215,7 +211,6 @@ Remember these shortcut names, (defined by the above code-snippet):
 6. Run: `dsd traefik` to start the traefik container
 
 7. Enjoy Traefik and add more containers.
-
 ---
 
 ## 5 - ForwardAuth Setup Steps
@@ -269,7 +264,6 @@ Remember these shortcut names, (defined by the above code-snippet):
 22. Wait 30 seconds and then launch `https://traefik.<yourdomainhere>`
 
 23. Enter Auth0 authentication login to reach traefik dashboard
-
 ---
 
 ## 6 - Scripts Setup
