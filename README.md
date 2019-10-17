@@ -15,10 +15,11 @@ Please consider donating above to support the [QNAP Unofficial Discord](https://
 
 # QNAP Docker Swarm Setup
 
-A guide for configuring the docker swarm stack on QNAP devices with Container Station
----
+  A guide for configuring the docker swarm stack on QNAP devices with Container Station
 
-## 1 - Preparation
+---------------------------------------
+
+## 1. Preparation
 
 - **Ports 80, 443, and 8080 *must be unused by your NAS.*** 
   - By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide.
@@ -37,9 +38,11 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
 - QTS Web Server application ports should be:
   - HTTP : 9880
   - HTTPS: 9443
----
 
-## 2 - Container Station Steps
+---------------------------------------
+
+## 2. Container Station Steps
+
 1. Backup what you have running now (if you don't have anything running yet, skip to Step 3 or 5)
 
 2. Shutdown and remove all Containers:
@@ -74,10 +77,11 @@ A guide for configuring the docker swarm stack on QNAP devices with Container St
     - If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to install manually via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
   - Search for `entware-std` and install that package.
 
-  **Important: *DO NOT* CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.**
----
+  - **Important:** *DO NOT* CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.
 
-## 3 - QNAP CLI Steps
+---------------------------------------
+
+## 3. QNAP CLI Steps
 
 1. **Run:** `id dockeruser` in terminal and note the 'uid' and 'gid'
 
@@ -104,7 +108,7 @@ XXXXXXXXXXXX        ingress                overlay             swarm
 XXXXXXXXXXXX        none                   null                local
 ```
 
-**Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
+  **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
 
 5. **Run:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
@@ -190,9 +194,10 @@ Remember these shortcut names, (defined by the above code-snippet):
   ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
   **See below** for scripts that need to be created and added to `/share/appdata/scripts` folder.
----
 
-## 4 - Traefik Setup Steps
+---------------------------------------
+
+## 4. Traefik Setup Steps
 
 1. Add the three provided traefik files in "/config/traefik/" to `/share/appdata/config/traefik` (.yml, .toml, .env)
 
@@ -211,9 +216,10 @@ Remember these shortcut names, (defined by the above code-snippet):
 6. Run: `dsd traefik` to start the traefik container
 
 7. Enjoy Traefik and add more containers.
----
 
-## 5 - ForwardAuth Setup Steps
+---------------------------------------
+
+## 5. ForwardAuth Setup Steps
 
 1. Go to https://auth0.com
 
@@ -264,9 +270,10 @@ Remember these shortcut names, (defined by the above code-snippet):
 22. Wait 30 seconds and then launch `https://traefik.<yourdomainhere>`
 
 23. Enter Auth0 authentication login to reach traefik dashboard
----
 
-## 6 - Scripts Setup
+---------------------------------------
+
+## 6. Scripts Setup
 Please create these scripts and save them to `/share/appdata/scripts` if you want to use the cli shortcuts we created in earlier steps.  **NOTE:** `setup_stack.sh` requires you to add your NAS IP for it to work.
 All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to match your setup.  If you do not edit them they will fail to deploy the stacks you don't have .. nothing blows up, no bunnies die, just a big pile of nothingness in your swarm.
 
