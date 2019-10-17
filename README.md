@@ -189,8 +189,7 @@ Remember these shortcut names, (defined by the above code-snippet):
 
   ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-**See below** for scripts that need to be created and added to `/share/appdata/scripts` folder.
-
+  **See below** for scripts that need to be created and added to `/share/appdata/scripts` folder.
 ---
 
 ## 4 - Traefik Setup Steps
