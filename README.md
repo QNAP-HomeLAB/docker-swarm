@@ -53,7 +53,10 @@ Please consider donating above to support the [QNAP Unofficial Discord](https://
   - To be sure you don't have a swarm left hanging around, run:
     `docker swarm leave --force`
 
-3. Remove Container Station
+3. Remove Container Station:
+   - In App Center, click the dropdown for Container Station and choose `Remove`
+   - In Control Panel, Shared Folders, check the box next to the `Container` shared folder and click "Remove"  ([example](https://i.imgur.com/s1jXNNs.png))
+   - In the pop-up box, check "Also delete the data" and click "Yes" ([example](https://i.imgur.com/WXML3fl.png))
 
 4. Reboot NAS ([example](https://i.imgur.com/voFkAt9.png))
 
@@ -206,12 +209,14 @@ Remember these shortcut names, (defined by the above code-snippet):
 
 3. **Edit:** _traefik.yml_ and _traefik.toml_ to include your domain name.
 
-4. In an SSH CLI (command line) run the below commands to set traefik folder permissions.
-  - **Run:** `cd /share/appdata/config/traefik` -- changes current directory
-  - **Run:** `touch acme.json` -- updates the file timestamp
-  - **Run:** `chmod 600` -- sets 'rw' permissions for the current owner of the folder 
+4. In an SSH CLI (command line) run the below commands to set traefik folder/file permissions:
+  - **Run:** `rm /share/appdata/config/traefik/acme.json`
+  - **Run:** `touch /share/appdata/config/traefik/acme.json`
+  - **Run:** `chmod 600 /share/appdata/config/traefik/acme.json`
 
-5. Check that `traefik.<yourdomain.com>` resolves to your WAN IP (Run `ping traefik.<yourdomain.com>` - Press `ctrl+c` to stop the ping)
+5. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
+  - **Run:** `ping traefik.<yourdomain.com>` 
+  - **Press:** `ctrl+c` to stop the ping
 
 6. Run: `dsd traefik` to start the traefik container
 
