@@ -66,11 +66,11 @@ Please consider donating above to support the [QNAP Unofficial Discord](https://
 6. Create a new user called _dockeruser_ 
 
 7. Create the following folder shares *using the QTS web-GUI* at `ControlPanel >> Privilege >> Shared Folders` and give _dockeruser_ Read/Write permissions:
-  - `/share/appdata`
+  - `/share/swarm/appdata`
     - Here we will add folders named < stack name >. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>\AppData` in Windows.
-  - `/share/appdata/config`
+  - `/share/swarm/config`
     - Here we will also add folders named < stack name >. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
-  - `/share/runtime`
+  - `/share/swarm/runtime`
     - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
 
 8. Install the `entware-std` package from the third-party QNAP Club repository. This is necessary in order to setup the shortcuts/aliases in Steps 18 & 19 by editing a permanent profile.
@@ -86,9 +86,9 @@ Please consider donating above to support the [QNAP Unofficial Discord](https://
 
 ## 3. QNAP CLI Steps
 
-1. **Run:** `id dockeruser` in terminal and note the 'uid' and 'gid'
+1. **TYPE:** `id dockeruser` in terminal and note the 'uid' and 'gid'
 
-2. **Run:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
+2. **TYPE:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
 
 ```[~] # docker network ls
 NETWORK ID          NAME                DRIVER              SCOPE
@@ -113,112 +113,134 @@ XXXXXXXXXXXX        none                   null                local
 
   **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
 
-5. **Run:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
+5. **TYPE:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
-6. **Run:** `mkdir -p /share/appdata/traefik`
+6. **TYPE:** `mkdir -p /share/swarm/appdata/traefik`
 
-7. **Run:** `mkdir -p /share/appdata/config/traefik`
+7. **TYPE:** `mkdir -p /share/swarm/config/traefik`
 
-8. **Run:** `mkdir -p /share/runtime/traefik`
+8. **TYPE:** `mkdir -p /share/swarm/runtime/traefik`
 
 9. Install nano or vi, whichever you are more comfortable with (e.g. Run `opkg install nano` or `opkg install vim`)
   - ***NOTE:*** You must have installed the `entware-std` package as detailed above in Section-2 Step-8 to be able to use the "opkg" installer.
 
-10. **Run:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
+10. **TYPE:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
   - Add the following lines to the end of the file and save
 
   ***NOTE:*** If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.  
   Please set the file format to UNIX (LF) in order for the profile and scripts to work correctly.
 
 ```
-dfc() {
-    bash /share/appdata/scripts/folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
+dfc(){
+    bash /share/swarm/scripts/folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9"
 }
-dup() {
-    bash /share/appdata/scripts/restart_stack.sh
+dup(){
+    bash /share/swarm/scripts/restart_stack.sh
 }
-dsd() {
-    docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+dsd(){
+  if [[ $1 = "-default" ]]; then
+      list=( traefik portainer docker-cleanup ouroboros nextcloud privatebin ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack deploy "$i" -c /share/swarm/config/"$i"/"$i".yml
+  done
+  unset list IFS
 }
-dsr() {
-    docker stack rm "$1"
+dsr(){
+  if [[ $1 = "-all" ]]; then
+      IFS=$'\n'; 
+      list=( $(docker stack ls --format {{.Name}}) ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack rm "$i"
+  done
+  unset list IFS
 }
-dss() {
-    bash /share/appdata/scripts/setup_stack.sh
+dss(){
+    bash /share/swarm/scripts/setup_stack.sh
 }
-dsp() {
+dsp(){
     bash docker system prune -f
 }
-dsrms() {
-    bash /share/appdata/scripts/remove_stack.sh
+dsrms(){
+    bash /share/swarm/scripts/remove_stack.sh
 }
-bounce() {
- limit=15
- docker stack rm "$1"
-  until [ -z "$(docker service ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
-   sleep 1;
-   limit="$((limit-1))"
+bounce(){
+  if [[ $1 = "-all" ]]; then
+      IFS=$'\n'; 
+      list=( $(docker stack ls --format {{.Name}}) ); 
+    else
+      list="$@"
+  fi
+  for i in "${list[@]}"; do
+    docker stack rm "$i"
   done
- limit=15  
-  until [ -z "$(docker network ls --filter label=com.docker.stack.namespace=$1 -q)" ] || [ "$limit" -lt 0 ]; do
-   sleep 1;
-   limit="$((limit-1))"
+  for i in "${list[@]}"; do
+    while [ "$(docker service ls --filter label=com.docker.stack.namespace=$i -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$i -q)" ]; do sleep 1; done
   done
- docker stack deploy "$1" -c /share/appdata/config/"$1"/"$1".yml
+  for i in "${list[@]}"; do
+    docker stack deploy "$i" -c /share/swarm/config/"$i"/"$i".yml
+  done
+  unset list IFS
 }
-dcu() {
-    docker-compose -f /share/appdata/config/"$1"/"$1".yml up -d
+dcu(){
+    docker-compose -f /share/swarm/config/"$1"/"$1".yml up -d
 }
-dcd() {
-    docker-compose -f /share/appdata/config/"$1"/"$1".yml down
+dcd(){
+    docker-compose -f /share/swarm/config/"$1"/"$1".yml down
 }
 ```
 
 Remember these shortcut names, (defined by the above code-snippet):
 - **dfc** -- creates the folder structure for a single (or multiple) stack. If you want to setup multiple stack folders use `dfc plex ombi PiHole` (up to 9 stacks at a time). 
   - e.g. `dfc plex` would create these three folders:
-    - `/share/appdata/plex`
-    - `/share/appdata/config/plex`
-    - `/share/runtime/plex`
-- **dup** -- starts existing stacks declared in `/share/appdata/scripts/restart_stack.sh`
+    - `/share/swarm/appdata/plex`
+    - `/share/swarm/config/plex`
+    - `/share/swarm/runtime/plex`
+- **dup** -- starts existing stacks declared in `/share/swarm/scripts/restart_stack.sh`
 - **dsd** -- deploys a single stack - e.g. `dsd traefik`
 - **dsr** -- removes a single stack - e.g. `dsr traefik`
 - **dss** -- will create a new swarm, create a new overlay network, and start all stacks declared in 
-  - `/share/appdata/scripts/setup_stack.sh`
+  - `/share/swarm/scripts/setup_stack.sh`
 - **dsp** -- prunes the docker system.  Any containers or networks not running will be removed -e.g. `dsp`
 - **dsrms** -- will remove all stacks, prune the docker system, remove any overlay networks, and leave the swarm - e.g. `dsrms` 
   - ***Use with care!***
 - **bounce** -- removes a single stack and recreates it - e.g. `bounce traefik`
-  - removes existing `traefik` stack, then recreates using `/share/appdata/config/traefik/traefik.yml`
+  - removes existing `traefik` stack, then recreates using `/share/swarm/config/traefik/traefik.yml`
 - **dcu** -- starts a docker-compose container
-  - e.g. `dcu openvpn` starts the container defined by `/share/appdata/config/openvpn/openvpn.yml`
+  - e.g. `dcu openvpn` starts the container defined by `/share/swarm/config/openvpn/openvpn.yml`
 - **dcd** -- stops a docker-compose container - e.g. `dcd openvpn`
 
   ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-  **See below** for scripts that need to be created and added to `/share/appdata/scripts` folder.
+  **See below** for scripts that need to be created and added to `/share/swarm/scripts` folder.
 
 ---------------------------------------
 
 ## 4. Traefik Setup Steps
 
-1. Add the three provided traefik files in "/config/traefik/" to `/share/appdata/config/traefik` (.yml, .toml, .env)
+1. Add the three provided traefik files from the git repository folder "/config/traefik/" to `/share/swarm/config/traefik` 
+    - (application.yaml, traefik-static.yaml, traefik.yml)
 
-2. **Edit:** _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7 & 8 
-  - **Note:** If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file.
+2. **EDIT:** _traefik.env_ and put your cloudflare email and GLOBAL API KEY in lines 7 & 8 
+    - **NOTE:** If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.env_ file.
 
-3. **Edit:** _traefik.yml_ and _traefik.toml_ to include your domain name.
+3. **EDIT:** _application.yaml_ and _traefik.yml_ to include your domain name.
 
-4. In an SSH CLI (command line) run the below commands to set traefik folder/file permissions:
-  - **Run:** `rm /share/appdata/config/traefik/acme.json`
-  - **Run:** `touch /share/appdata/config/traefik/acme.json`
-  - **Run:** `chmod 600 /share/appdata/config/traefik/acme.json`
+4. In an SSH Terminal with your QNAP, run the below commands to set traefik folder/file permissions:
+    - **TYPE:** `rm /share/swarm/config/traefik/acme.json`
+    - **TYPE:** `touch /share/swarm/config/traefik/acme.json`
+    - **TYPE:** `chmod 600 /share/swarm/config/traefik/acme.json`
 
 5. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
-  - **Run:** `ping traefik.<yourdomain.com>` 
-  - **Press:** `ctrl+c` to stop the ping
+    - **TYPE:** `ping traefik.<yourdomain.com>` 
+    - **Press:** `ctrl+c` to stop the ping
 
-6. Run: `dsd traefik` to start the traefik container
+6. **TYPE:** `dsd traefik` to start the traefik container
 
 7. Enjoy Traefik and add more containers.
 
@@ -226,63 +248,74 @@ Remember these shortcut names, (defined by the above code-snippet):
 
 ## 5. ForwardAuth Setup Steps
 
-1. Go to https://auth0.com
+1. Navigate to https://auth0.com 
+    - Sign in or register for an account
+    - Note the Tenant Domain provided by Auth0
 
-2. Sign in or register an account
+2. Navigate to https://github.com 
+    - Sign in or register an account using OAuth
 
-3. Note Tenant Domain provided by Auth0
+    - Go to _Settings -> Developer Settings - OAuth Apps_
+        - Create a new app (call it something to recognize it is linked to Auth0)
+        - Add homepage URL as `https://<yourauth0accounthere>.auth0.com/`
+        - Add authorization callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
+        - Click "Register appliction" button
+        - Note the "Client ID" and "Client Secret"
 
-4. Login or create an account with https://github.com (using OAuth)
+3. Navigate back to Auth0
+    - Go to _Connections -> Social_
+        - CLICK the _Github_ slider
+            - Enter your GitHub app "ClientID" and "Client Secret" from the previous step
+        **NOTE:** Ensure the Attribute _"Email Address"_ is ticked
+        - Click the "Save" button
+        **NOTE:** Make sure the gray/green slider for _GitHub_ is "green"
 
-5. Go to _Settings -> Developer Settings - OAuth Apps_
+    - Go to _Applications_
+        - Click on the "Create Application" button
+        - Name the new app something recognizable
+        - Select the "Regular Web Applications" box
+        - Click the "Create" button
+        - Once the app is created, click on the "Settings" tab
+            - Use the Auth0 "Client ID" and "Client Secret" in your _application.yaml_ file
+            **NOTE:** Enter these in Lines 22 & 23, replacing the < redacted > tag
+            - Ensure "Token Endpoint Authentication Method" drop down box shows as "Post"
+            - Enter in your Callback URL(s), for example:
+            ```
+            https://<service>.<domain>/signin,
+            https://<service>.<domain>/oauth/signin
+            ```
+        - In the "Allowed Web Origins" field, enter your origin URL:
+            `https://<your URL here>`
+        - Click the "Save changes" button
 
-6. Create a new app (call it something to recognize it is linked to Auth0)
+    - Go to _Users & Roles -> Users_
+        - Create a user with a real email address and password
+        **NOTE:** _You will use this later so remember it!_
 
-7. Note the client ID and Secret
+    - Go to _Rules_
+        - Click the _Create Rule_ button (top right)
+        - Under the _Access Control_ section, select the _Whitelist_ type 
+        - Enter in your email address into the whitelist field on Line 8:
+        `const whitelist = [ 'your email here', '2nd email here' ]; //authorized users`
 
-8. Add homepage URL as `https://<yourauth0accounthere>.auth0.com/`
-
-9. Add authorization callback URL as `https://<yourauth0accounthere>.auth0.com/login/callback`
-
-10. Go back to Auth0
-
-11. Go to _Connections -> Social_
-
-12. Select _Github_ and enter in your Github app ClientID and secret Credentials 
-  **NOTE:** ENSURE _Attribute "Email Address"_ is ticked
-
-13. Create an application on Auth0 (regular web app)
-
-14. Use the Auth0 clientID and Client Secret in your _application.yaml_ file
-
-15. Make sure to specify POST method of token endpoint authentication (Drop down box)
-
-16. Enter in your Callback URL (`https://<service>.<domain>/signin` & `https://<service>.<domain>/oauth/signin`)
-  For an entire domain, the values should look like this example:
-
-
-17. Enter your origin URL (`https://<your URL here>`) and save changes
-
-18. Go to Users & Roles and Create a user with a real email address.  You will use this later so remember it!
-
-19. Click on _Rules -> Whitelist_
-
-20. Enter in your email address into the whitelist field 
-  e.g. `Line 8 "const whitelist = [ '<your email here>']; //authorized users"`
-
-21. Open ssh and `dsr traefik`, wait 10 seconds and `dsd traefik`
-
-22. Wait 30 seconds and then launch `https://traefik.<yourdomainhere>`
-
-23. Enter Auth0 authentication login to reach traefik dashboard
+4. Open an SSH Terminal to your QNAP
+    - **TYPE:** `dsr traefik` to remove the Traefik stack
+        - Wait 10 seconds
+    - **TYPE:** `dsd traefik` to deploy the Traefik stack
+        - Wait 30 seconds
+    - Launch `https://traefik.<yourdomainhere>`
+    - Enter Auth0 authentication login to reach traefik dashboard
 
 ---------------------------------------
 
 ## 6. Scripts Setup
-Please create these scripts and save them to `/share/appdata/scripts` if you want to use the cli shortcuts we created in earlier steps.  **NOTE:** `setup_stack.sh` requires you to add your NAS IP for it to work.
-All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to match your setup.  If you do not edit them they will fail to deploy the stacks you don't have .. nothing blows up, no bunnies die, just a big pile of nothingness in your swarm.
+Please create these scripts and save them to `/share/swarm/scripts` if you want to use the cli shortcuts we created in earlier steps.
 
-***NOTE:*** Please ensure you save these files in UNIX (LF) format.  Windows (CR LF) format will break these scripts.  If you are a Windows user, please download the files from the scripts folder above.
+**NOTE:** `setup_stack.sh` requires you to add your NAS IP for it to work.
+
+All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to match your setup.  If you do not edit them they will fail to deploy the stacks you did not list... nothing blows up, no bunnies die, just a big pile of nothingness in your swarm.
+
+**NOTE:** Please ensure you save these files in UNIX (LF) format.  Windows (CR LF) format will break these scripts.  If you are a Windows user, please download the files from the scripts folder above.
 
 ##### folder_setup.sh
 
@@ -291,9 +324,9 @@ All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to ma
 # Script to create gkoerk's famously awesome folder structure for stacks
 
 # Set folder paths here (you should not need to change these, but if you do, it will save a load of typing)
-appdata=/share/appdata
-config=/share/appdata/config
-runtime=/share/runtime
+appdata=/share/swarm/appdata
+config=/share/swarm/config
+runtime=/share/swarm/runtime
 
 # Help message for script
 helpFunction() {
@@ -331,7 +364,7 @@ stacks=(portainer docker-cleanup
     emby privatebin autopirate hackmd
 )
 # define config folder
-config_folder=/share/appdata/config
+config_folder=/share/swarm/config
 
 echo "**** Starting Traefik ****"
 # Traefik needs to be the first stack deployed
@@ -368,7 +401,7 @@ stacks=(portainer docker-cleanup
     emby privatebin autopirate hackmd
 )
 # define config folder
-config_folder=/share/appdata/config
+config_folder=/share/swarm/config
 
 echo "**** Removing Stacks ****"
 # remove all services in docker swarm
@@ -418,7 +451,7 @@ stacks=(portainer docker-cleanup
     plex privatebin autopirate
 )
 # define config folder
-config_folder=/share/appdata/config
+config_folder=/share/swarm/config
 
 echo "**** Starting Traefik ****"
 # Traefik needs to be the first stack deployed
