@@ -20,6 +20,8 @@ helpFunction(){
 # Check for '-noremove' command options
   if [[ "$1" = "-noremove" ]] ; then
     input=no;
+  elif [[ $1 = "-all" ]] ; then
+    input=yes;
   elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     helpFunction
   else

@@ -19,8 +19,11 @@ helpFunction(){
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
   source /share/swarm/configs/swarm_vars.conf
-  source /share/swarm/scripts/docker_stack_bounce.sh
   deploy_list=""
+
+# Make sure the $swarm_folder structure is usable by the `dockuser` username and group
+  chown -R $var_usr:$var_grp $swarm_folder
+  chmod -R 640 $swarm_folder # OWNER: Read/Write, GROUP: Read
 
 # Define which stack(s) to load using command options
   if [[ $1 = "-all" ]]; then

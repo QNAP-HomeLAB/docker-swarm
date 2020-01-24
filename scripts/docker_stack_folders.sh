@@ -39,7 +39,8 @@ helpFunction(){
   echo
 
 # Change all swarm folders to the 'user:group' to the 'dockuser' and appropriate group number
-  chown -R $var_user:$var_group $swarm_folder
+  chown -R $var_usr:$var_grp $swarm_folder
+  chmod -R 640 $swarm_folder
   echo "FOLDER OWNERSHIP UPDATED"
   echo 
 
