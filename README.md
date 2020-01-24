@@ -83,49 +83,12 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
     * You can use [PuTTY](https://putty.org/) 
     * I prefer to use [BitVise](https://www.bitvise.com/ssh-client-download) because this also has an SFTP remove file browser interface.
 
-2. **TYPE:** `id dockeruser` in terminal and note the 'uid' and 'gid'
-
-3. **TYPE:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
-
-```
-[~] # docker network ls
-NETWORK ID          NAME                DRIVER              SCOPE
-XXXXXXXXXXXX        bridge              bridge              local
-XXXXXXXXXXXX        host                host                local
-XXXXXXXXXXXX        none                null                local
-```
-
-4. Run: `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas internal LAN IP address
-
-5. **CHECKPOINT:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
-    * The networks should match the following (except the generated NETWORK ID):
-
-```
-[~] # docker network ls
-NETWORK ID          NAME                   DRIVER              SCOPE
-XXXXXXXXXXXX        bridge                 bridge              local
-XXXXXXXXXXXX        docker_gwbridge        bridge              local
-XXXXXXXXXXXX        host                   host                local
-XXXXXXXXXXXX        ingress                overlay             swarm
-XXXXXXXXXXXX        none                   null                local
-```
-
-  **Important: If your configuration is lacking a docker_gwbridge or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
-
-6. Create the docker network overlay:
-    - **TYPE:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
-
-7. Create the Traefik specific folders:
-    - **TYPE:** `mkdir -p /share/swarm/appdata/traefik`
-    - **TYPE:** `mkdir -p /share/swarm/configs/traefik`
-    - **TYPE:** `mkdir -p /share/swarm/runtime/traefik`
-
-8. Install nano or vi, whichever you are more comfortable with (only one needed)
+2. Install nano or vi, whichever you are more comfortable with (only one needed)
     - **RUN:** `opkg install nano`
     - **RUN:** `opkg install vim`
     - ***NOTE:*** You must have installed the `entware-std` package as detailed above in Section-2 Step-8 to be able to use the "opkg" installer.
 
-9. **TYPE:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
+3. **TYPE:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
     ***NOTE:*** If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.  
   Please set the file format to UNIX (LF) in order for the profile and scripts to work correctly.
   - Add the following lines to the end of the file and save:
@@ -183,7 +146,7 @@ dwlv(){
 }
 # docker_swarm_remove -- REMOVES all stack containers, REMOVES the overlay network, and LEAVES the swarm. USE WITH CAUTION!
 dwrm(){
-  bash /share/swarm/scripts/docker_swarm_remove.sh -all
+  bash /share/swarm/scripts/docker_swarm_leave.sh -all
 }
 ```
 
@@ -219,43 +182,87 @@ dwrm(){
 
   - `dwup` -- docker_swarm_setup - creates a new swarm, and overlay network, then starts all stacks declared in $configs_folder
       - **SYNTAX:** `dwup`
-  - `dwrm` -- docker_swarm_remove - removes all stacks, prunes docker system - USE WITH CAUTION!
-      - **SYNTAX:** `dwrm`
   - `dwlv` -- docker_swarm_leave - prunes docker system, leaves swarm - USE WITH CAUTION!
       - **SYNTAX:** `dwlv`
+  - `dwrm` -- docker_swarm_remove - removes all stacks, prunes docker system - USE WITH CAUTION!
+      - **SYNTAX:** `dwrm` (same as `dwlv -all`)
 
   - `dprn` -- docker_system_prune - prunes the Docker system of unused images, networks, and containers
       - **SYNTAX:** `dprn`
 
   ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-  **See below** for script files that need to be created and added to `/share/swarm/scripts` folder.
+  **See below** in Section-6 and Section-7 for script files that need to be created and added to `/share/swarm/scripts` folder.
       * These script files are required in order to utilize the above shortcut commands.
+
+4. **TYPE:** `id dockeruser` in terminal and note the 'uid' and 'gid'
+    - Enter the discovered userid and groupid into the variables file from Section-6 below.
+
+5. **TYPE:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
+
+```
+[~] # docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+XXXXXXXXXXXX        bridge              bridge              local
+XXXXXXXXXXXX        host                host                local
+XXXXXXXXXXXX        none                null                local
+```
+
+6. If you successfully edited the bash `profile` above, _AND_ saved the scripts from Section-7 below, you can use the shortcut command `dwup` instead of manually performing steps 7 - 9 just below.
+    - **TYPE:** `dwup`
+    - **NOTE:** It is very important to read steps 7 - 9, and make sure the proper networks _were_ created.
+
+7. Run: `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas internal LAN IP address
+
+8. **CHECKPOINT:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
+    * The networks should match the following (except the generated NETWORK ID):
+
+```
+[~] # docker network ls
+NETWORK ID          NAME                   DRIVER              SCOPE
+XXXXXXXXXXXX        bridge                 bridge              local
+XXXXXXXXXXXX        docker_gwbridge        bridge              local
+XXXXXXXXXXXX        host                   host                local
+XXXXXXXXXXXX        ingress                overlay             swarm
+XXXXXXXXXXXX        none                   null                local
+```
+
+- **IMPORTANT: If your configuration is lacking the `docker_gwbridge` network, or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
+
+9. Create the docker network overlay:
+    - **TYPE:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
 ---------------------------------------
 
 ## 4. Traefik Setup Steps
 
-1. Add the three provided traefik files from the git repository folder "/config/traefik/" to `/share/swarm/configs/traefik` 
+1. Create the Traefik specific folders (listed below) by typing `dsf traefik`
+    - Alternatively, you can manually type these commands into a terminal:
+        - **TYPE:** `mkdir -p /share/swarm/appdata/traefik`
+        - **TYPE:** `mkdir -p /share/swarm/configs/traefik`
+        - **TYPE:** `mkdir -p /share/swarm/runtime/traefik`
+
+2. Add the three provided traefik files from the git repository folder "/config/traefik/" to `/share/swarm/configs/traefik` 
     - `application.yaml`, `traefik-static.yaml`, `traefik.yml`
-2. **EDIT:** _traefik.yml_ and put your cloudflare email and GLOBAL API KEY in lines 7 & 8 
+
+3. **EDIT:** _traefik.yml_ and put your cloudflare email and GLOBAL API KEY in lines 7 & 8 
     **NOTE:** If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.yml_ file.
 
-3. **EDIT:** _application.yaml_ and _traefik.yml_ to include your domain name.
+4. **EDIT:** _application.yaml_ and _traefik.yml_ to include your domain name.
 
-4. In an SSH Terminal with your QNAP, run the below commands to set traefik folder/file permissions:
+5. In an SSH Terminal with your QNAP, run the below commands to set traefik folder/file permissions:
     - **TYPE:** `rm /share/swarm/configs/traefik/acme.json`
     - **TYPE:** `touch /share/swarm/configs/traefik/acme.json`
     - **TYPE:** `chmod 600 /share/swarm/configs/traefik/acme.json`
 
-5. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
+6. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
     - **TYPE:** `ping traefik.<yourdomain.com>` 
     - **Press:** `ctrl+c` to stop the ping
     **NOTE:** If you don't get the proper IP during this ping operation, update your DNS settings with your domain provider.
 
-6. **TYPE:** `dsd traefik` to start the traefik container
+7. **TYPE:** `dsd traefik` to start the traefik container
 
-7. Enjoy Traefik and add more containers.
+* Enjoy Traefik and add more containers.
 
 ---------------------------------------
 
@@ -334,26 +341,33 @@ These variable/config files need to be filled in with your information in order 
 ##### swarm_stacks.conf
   * This is the list of _all_ stacks you might deploy in your swarm
       * Add a stack name here each time you add a new stack 
+      * the `stacks_default` array only lists your 'core' stacks, do not include all stack names
 ```
 # List desired services inside the 'stacks' array parentheses (each service name separated by at least a space)
 ## Each listed stack will require a corresponding '/stackname/stackname.yml' folder/file in the 'configs' folder defined below
 ## NOTE: Leave Traefik off the list as it will be started seperately
 stacks_default=(
-  graylog
-  portainer
+  bitwarden
   ddclient
   docker-cleanup
-  ouroboros
+  graylog
   nextcloud
-  privatebin
+  portainer
+  shepherd
   )
 stacks_listed=(
+  bookstack
   calibre
-  calibre
-  wetty
-  traefik
-  TRAEFIK
-  TrAeFiK
+  calibre-web
+  deluge
+  discourse
+  filebot
+  ghost
+  nextcloud
+  openvpn
+  plex
+  privatebin
+  syncthing
   )
 stacks_all=(
   autopirate
@@ -380,29 +394,56 @@ stacks_all=(
 ```
 
 ##### swarm_vars.conf
-  * These variables are used in the scripts found in `/share/swarm/scripts/`
-      * the `stacks_default` array only lists your 'core' stacks, do not include all stack names
+  * These variables are used in the scripts found in `/share/swarm/scripts/` and `/share/swarm/configs/`
+
 ```
-# Variables list for Drauku's modified QNAP Docker Swarm stack scripts.
-# These variables must be filled in with your network, architecture, etc.
+# Variables list for Drauku's QNAP Docker Swarm stack scripts.
+# These variables must be filled in with your network, architecture, etc, information.
+
+# Ensure this file name variable exactly references THIS file
+  variables_file=swarm_vars.env
 
 # Folder paths for Drauku's folder structure, modified from gkoerk's famously awesome folder structure for stacks
-swarm_folder=/share/swarm
-appdata_folder=${swarm_folder}/appdata
-configs_folder=${swarm_folder}/configs
-runtime_folder=${swarm_folder}/runtime
-secrets_folder=${swarm_folder}/secrets
-scripts_folder=${swarm_folder}/scripts
-stacks_folder=${swarm_folder}/stacks
+  swarm_folder=/share/swarm
+  appdata_folder=${swarm_folder}/appdata
+  configs_folder=${swarm_folder}/configs
+  runtime_folder=${swarm_folder}/runtime
+  secrets_folder=${swarm_folder}/secrets
+  scripts_folder=${swarm_folder}/scripts
+  stacks_folder=${swarm_folder}/stacks
 
-# These variables are required to properly assign user:group to newly created folders
-var_user=1000
-var_group=100
+# Internal network and docker system variables
+  var_nas_ip=NASLANIP
+  var_usr=1000
+  var_grp=100
+  var_tz_region=America
+  var_tz_city=Chicago
 
-# Internal network NAS IP address
-var_nas_ip=192.168.186.150
+# Domain and user information variables
+  var_nas_name=NASNAME #THIS MIGHT NOT WORK FOR CREATING A 'SERVICE' NAME USING Traefik
+  var_domain=PERSONALDOMAIN.TLD
+  var_email=PERSONAL@EMAIL.ADDRESS
+  var_target_email=EMAIL.ADDRESS@FOR.LOGS
 
-#
+# External network resolution and access variables
+  var_certresolver=cloudflare
+  # If your 'certresolver' and 'dns' services are through cloudflare, fill in the below variables:
+  var_cf_user=CLOUDFLAREUSERNAME
+  #var_cf_api=<secret>
+  # If your 'certresolver' and 'dns' services are through namecheap, fill in the below variables:
+  var_namecheap_email=NAMECHEAP@EMAIL.ADDRESS
+
+# Database names, usernames, etc
+  var_mongo_db_usr=dockmongo
+  #var_mongo_db_pwd=<secret>
+  var_mysql_db_usr=dockmysql
+  #var_mysql_db_pwd=<secret>
+
+# The below variables are service specific, and can be modified directly in the 'service.yaml' config files.
+# I find it easier to maintain them in one location.
+
+# SERVICENAME specific config variables
+
 
 ```
 ---------------------------------------
