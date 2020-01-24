@@ -73,6 +73,7 @@ helpFunction(){
 # Deploy indicated stack(s)
   for stack in "${deploy_list[@]}"; do
     echo "*** DEPLOYING '$stack' ***"
+    ln -sf ../swarm_vars.conf $configs_folder/${stack}/.env
     docker stack deploy $stack -c ${configs_folder}/${stack}/${stack}.yml
     echo "**** '$stack' DEPLOYED, WAITING 10 SECONDS ****"
     sleep 10
