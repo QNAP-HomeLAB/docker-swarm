@@ -1,0 +1,15 @@
+# Traefik Dynamic Configuration
+# Routers: Global HTTP -> HTTPS Redirect
+# Host Path: ${configs_folder}/traefik/dynamic/globalredirect.yaml
+# Internal Path: /etc/traefik/dynamic/globalredirect.yaml
+
+http:
+  routers:
+    https-redirect:
+      entryPoints:
+        - http
+      middlewares:
+        - https-redirect
+      rule: "HostRegexp(`{host:[a-z-.]+}`)"
+      priority: 10
+      service: noop

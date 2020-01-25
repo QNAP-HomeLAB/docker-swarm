@@ -1,0 +1,25 @@
+# Wetty Recipe
+# ${configs_folder}/wetty/wetty.yml
+version: "3.4"
+
+services:
+  wetty:
+    image: krishnasrinivas/wetty:latest
+    environment:
+      SSHHOST: '${var_hostname'
+      SSHPORT: 4000
+      SSHUSER: '${var_ssh_user}'
+    networks:
+      - traefik_public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.wetty.entrypoints=https"
+        - "traefik.http.routers.wetty.rule=Host(`wetty.${var_domain}`)"
+        - "traefik.http.routers.wetty.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.wetty.middlewares=forward-auth@file"
+        - "traefik.http.services.wetty.loadbalancer.server.port=3000"       
+
+networks:
+  traefik_public:
+    external: true

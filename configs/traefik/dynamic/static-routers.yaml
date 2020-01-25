@@ -1,0 +1,20 @@
+# Traefik Dynamic Configuration
+# Routers: Static (Non-Docker) Routers
+# Host Path: ${configs_folder}/traefik/dynamic/static-routers.yaml
+# Internal Path: /etc/traefik/dynamic/static-routers.yaml
+
+http:
+  routers:
+    ${var_nas_name}:
+      entryPoints:
+        - https
+      middlewares:
+        - forward-auth
+      service: ${var_nas_name}
+      rule: "Host(`${var_nas_name}.${var_domain}`)"
+      tls:
+        certResolver: ${var_certresolver}
+        domains:
+          - main: "*.${var_domain}"
+            sans:
+              - ${var_domain}

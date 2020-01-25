@@ -1,0 +1,31 @@
+# ouroboros Recipe
+# ${configs_folder}/ouroboros/ouroboros.yml
+version: "3.4"
+
+services:
+  ouroboros:
+    image: pyouroboros/ouroboros:latest
+    environment:
+      - CLEANUP=true
+      - INTERVAL=300
+      # - SELF_UPDATE=true
+      - TZ=${var_tz_region}/${var_tz_city}
+      - LABEL_ENABLE=true
+      # - NOTIFIERS="mailtos://${var_domain}:${secret_gmail_pswd}?to=${var_target_email}"
+      - SWARM=true
+      - SKIP_STARTUP_NOTIFICATIONS=false
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+   networks:
+     - internal
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  internal:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 172.16.68.0/24
