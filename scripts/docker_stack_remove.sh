@@ -45,16 +45,20 @@ helpFunction(){
       fi
     done
   # If removing '-all' stacks, add 'traefik' back in as last stack in remove_list
-    if [[ $1 = "-all" ]]; then
+    if [[ "$1" = [tT][rR][aA][eE][fF][iI][kK] ]] || [[ $1 = "-all" ]]; then
       if [ "$(docker service ls --filter name=traefik -q)" != "" ]; then
         remove_list=( "${remove_list[@]}" "traefik" )
         echo " -> ${remove_list[@]}"
         echo
-        echo "*** 'Traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
+        echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
         echo
       fi
     elif [[ $1 = "traefik" ]]; then
-      read -r -p "Are you sure you want to remove the 'Traefik' stack? This could cause apps to be inaccessible. [Y/n] " input
+      if [[ "${bounce_list[@]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+        input=yes;
+      else
+        read -r -p "Are you sure you want to remove the 'traefik' stack? This could cause apps to be inaccessible. [Y/n] " input
+      fi
       case $input in
         [yY][eE][sS]|[yY])
           remove_list=( "${remove_list[@]}" "traefik" )
@@ -62,7 +66,7 @@ helpFunction(){
           echo
           ;;
         [nN][oO]|[nN])
-          echo "** 'Traefik' STACK WILL NOT BE REMOVED **";
+          echo "** 'traefik' STACK WILL NOT BE REMOVED **";
           ;;
         *)
           echo "INVALID INPUT: Must be any case-insensitive variation of '(y)es' or '(n)o'."
