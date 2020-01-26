@@ -74,7 +74,7 @@ services:
     image: elasticsearch:6.8.3
     ports:
       - ${port_elasticsearch}:9200
-    # forElastic search working properly use this command in CLI "sysctl -w vm.max_map_count=262144"
+    # Elasticsearch needs the below command run via CLI to properly.
     #entrypoint: |
       #sysctl -w vm.max_map_count=262144
     volumes:
