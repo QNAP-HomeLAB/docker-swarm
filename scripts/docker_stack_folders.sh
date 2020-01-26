@@ -22,7 +22,7 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
 
 # Print helpFunction in case parameters are empty, or -h option entered
   if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then

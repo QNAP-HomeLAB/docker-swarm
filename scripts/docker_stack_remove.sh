@@ -18,7 +18,7 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
   remove_list=""
 
 # Define which stack to remove using command options

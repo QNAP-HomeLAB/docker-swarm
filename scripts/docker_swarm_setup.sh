@@ -17,7 +17,7 @@ helpFunction(){
   }
 
 # Load config variables from file
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
 
 # Query which list of stacks the user wants to load.
   if [[ "$1" = "" ]]; then

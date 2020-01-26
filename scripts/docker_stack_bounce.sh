@@ -18,7 +18,7 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
   bounce_list=""
 
   if [[ $1 = "-all" ]]; then

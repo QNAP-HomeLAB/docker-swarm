@@ -18,7 +18,7 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
   deploy_list=""
 
 # Make sure the $swarm_folder structure is usable by the `dockuser` username and group

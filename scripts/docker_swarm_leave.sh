@@ -15,14 +15,14 @@ helpFunction(){
   }
 
 # Load config variables from file
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/swarm/scripts/script_vars.conf
 
 # Check for '-noremove' command options
   if [[ "$1" = "-noremove" ]] ; then
     input=no;
   elif [[ $1 = "-all" ]] ; then
     input=yes;
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     helpFunction
   else
     # Query if all stacks should be removed before leaving swarm
