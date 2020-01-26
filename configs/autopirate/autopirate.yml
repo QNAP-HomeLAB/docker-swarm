@@ -21,7 +21,7 @@ services:
         - "traefik.http.routers.heimdall.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.heimdall.middlewares=forward-auth@file"
         - "traefik.http.services.heimdall.loadbalancer.server.scheme=https"       
-        - "traefik.http.services.heimdall.loadbalancer.server.port=443"           
+        - "traefik.http.services.heimdall.loadbalancer.server.port=${port_heimdall}"
        
   oscarr:
     image: morpheus65535/oscarr:latest
@@ -40,7 +40,7 @@ services:
         - "traefik.http.routers.oscarr.rule=Host(`oscarr.${var_domain}`)"
         - "traefik.http.routers.oscarr.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.oscarr.middlewares=forward-auth@file"
-        - "traefik.http.services.oscarr.loadbalancer.server.port=5656" 
+        - "traefik.http.services.oscarr.loadbalancer.server.port=${port_oscarr}" 
          
   ombi:
     image: linuxserver/ombi:latest
@@ -60,7 +60,7 @@ services:
         - "traefik.http.routers.ombi.rule=Host(`ombi.${var_domain}`)"
         - "traefik.http.routers.ombi.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.ombi.middlewares=forward-auth@file"
-        - "traefik.http.services.ombi.loadbalancer.server.port=3579" 
+        - "traefik.http.services.ombi.loadbalancer.server.port=${port_ombi}" 
         
   headphones:
     image: linuxserver/headphones:latest
@@ -69,7 +69,7 @@ services:
       - PGID=${var_grp}
       - TZ=${var_tz_region}/${var_tz_city}
     volumes:
-      - /share/media/music:/music
+      - ${var_media_music}:/music
       - ${appdata_folder}/autopirate/headphones:/config
       - /share/downloads:/downloads
     networks:
@@ -81,7 +81,7 @@ services:
         - "traefik.http.routers.headphones.rule=Host(`headphones.${var_domain}`)"
         - "traefik.http.routers.headphones.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.headphones.middlewares=forward-auth@file"
-        - "traefik.http.services.headphones.loadbalancer.server.port=8181" 
+        - "traefik.http.services.headphones.loadbalancer.server.port=${port_headphones}" 
 
   sonarr:
     image: linuxserver/sonarr:latest
@@ -91,7 +91,7 @@ services:
       - TZ=${var_tz_region}/${var_tz_city}
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/media/tv:/tv
+      - ${var_media_shows}:/tv
       - ${appdata_folder}/autopirate/sonarr:/config
       - /share/downloads:/downloads
     networks:
@@ -103,7 +103,7 @@ services:
         - "traefik.http.routers.sonarr.rule=Host(`sonarr.${var_domain}`)"
         - "traefik.http.routers.sonarr.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.sonarr.middlewares=forward-auth@file"
-        - "traefik.http.services.sonarr.loadbalancer.server.port=8989" 
+        - "traefik.http.services.sonarr.loadbalancer.server.port=${port_sonarr}" 
          
   radarr:
     image: linuxserver/radarr:latest
@@ -112,7 +112,7 @@ services:
       - PGID=${var_grp}
       - TZ=${var_tz_region}/${var_tz_city}
     volumes:
-      - /share/media/movies:/movies
+      - ${var_media_movies}:/movies
       - ${appdata_folder}/autopirate/radarr:/config
       - /share/downloads:/downloads
     networks:
@@ -124,7 +124,7 @@ services:
         - "traefik.http.routers.radarr.rule=Host(`radarr.${var_domain}`)"
         - "traefik.http.routers.radarr.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.radarr.middlewares=forward-auth@file"
-        - "traefik.http.services.radarr.loadbalancer.server.port=7878"  
+        - "traefik.http.services.radarr.loadbalancer.server.port=${port_radarr}"  
       
   bazarr:
     image: linuxserver/bazarr:latest
@@ -147,7 +147,7 @@ services:
         - "traefik.http.routers.bazarr.rule=Host(`bazarr.${var_domain}`)"
         - "traefik.http.routers.bazarr.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.bazarr.middlewares=forward-auth@file"
-        - "traefik.http.services.bazarr.loadbalancer.server.port=6767"        
+        - "traefik.http.services.bazarr.loadbalancer.server.port=${port_bazarr}"        
         
   lidarr:
     image: linuxserver/lidarr:latest
@@ -169,7 +169,7 @@ services:
         - "traefik.http.routers.lidarr.rule=Host(`lidarr.${var_domain}`)"
         - "traefik.http.routers.lidarr.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.lidarr.middlewares=forward-auth@file"
-        - "traefik.http.services.lidarr.loadbalancer.server.port=8686"       
+        - "traefik.http.services.lidarr.loadbalancer.server.port=${port_lidarr}"       
 
   lazylibrarian:
     image: linuxserver/lazylibrarian:latest
@@ -191,7 +191,7 @@ services:
         - "traefik.http.routers.lazylibrarian.rule=Host(`lazylibrarian.${var_domain}`)"
         - "traefik.http.routers.lazylibrarian.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.lazylibrarian.middlewares=forward-auth@file"
-        - "traefik.http.services.lazylibrarian.loadbalancer.server.port=5299"     
+        - "traefik.http.services.lazylibrarian.loadbalancer.server.port=${port_lazylibrarian}"     
                  
   nzbhydra:
     image: linuxserver/hydra2:latest
@@ -211,7 +211,7 @@ services:
         - "traefik.http.routers.hydra2.rule=Host(`hydra2.${var_domain}`)"
         - "traefik.http.routers.hydra2.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.hydra2.middlewares=forward-auth@file"
-        - "traefik.http.services.hydra2.loadbalancer.server.port=5076"      
+        - "traefik.http.services.hydra2.loadbalancer.server.port=${port_nzbhydra}"      
 
   nzbget:
     image: linuxserver/nzbget:latest
@@ -232,7 +232,7 @@ services:
         - "traefik.http.routers.nzbget.rule=Host(`nzbget.${var_domain}`)"
         - "traefik.http.routers.nzbget.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.nzbget.middlewares=forward-auth@file"
-        - "traefik.http.services.nzbget.loadbalancer.server.port=6789"        
+        - "traefik.http.services.nzbget.loadbalancer.server.port=${port_nzbget}"        
        
   jackett:
     image: linuxserver/jackett:latest
@@ -253,7 +253,7 @@ services:
         - "traefik.http.routers.jackett.rule=Host(`jackett.${var_domain}`)"
         - "traefik.http.routers.jackett.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.jackett.middlewares=forward-auth@file"
-        - "traefik.http.services.jackett.loadbalancer.server.port=9117"            
+        - "traefik.http.services.jackett.loadbalancer.server.port=${port_jackett}"            
       
 networks:
   traefik_public:

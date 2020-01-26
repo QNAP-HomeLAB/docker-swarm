@@ -3,21 +3,22 @@
 version: "3.4"
 
 secrets:
-  mysql_root_password:
-    file: "${secrets_folder}/var_bookstack_mysql_root_pwd.secret"
-  mysql_password:
-    file: "${secrets_folder}/var_bookstack_mysql_password.secret"
-  mysql_pwd:
-    file: "${secrets_folder}/var_bookstack_mysql_pwd.secret"
-  
+  bookstack_mysql_user_pwd:
+    file: "${secrets_folder}/bookstack_mysql_user_pwd.secret"
+  bookstack_mysql_root_pwd:
+    file: "${secrets_folder}/bookstack_mysql_root_pwd.secret"
+    
 services:
   app:
     image: solidnerd/bookstack:latest
+    secrets:
+      - bookstack_mysql_user_pwd
+      - bookstack_mysql_root_pwd
     environment:
       - DB_HOST=db:3306
-      - DB_DATABASE=${var_bookstack_db}
-      - DB_USERNAME=${var_bookstack_usr}
-      - DB_PASSWORD=/run/secrets/var_bookstack_mysql_pwd
+      - DB_DATABASE=${var_bookstack_mysql_db}
+      - DB_USERNAME=${var_bookstack_mysql_usr}
+      - DB_PASSWORD=/run/secrets/bookstack_mysql_user_pwd
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -33,11 +34,14 @@ services:
 
   db:
     image: mariadb:10
+    secrets:
+      - bookstack_mysql_user_pwd
+      - bookstack_mysql_root_pwd
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=/run/secrets/var_bookstack_mysql_root_pwd
+      - MYSQL_RANDOM_ROOT_PASSWORD=/run/secrets/bookstack_mysql_root_pwd
       - MYSQL_DATABASE=${var_bookstack_mysql_db}
       - MYSQL_USER=${var_bookstack_mysql_usr}
-      - MYSQL_PASSWORD=/run/secrets/var_bookstack_mysql_pwd
+      - MYSQL_PASSWORD=/run/secrets/bookstack_mysql_user_pwd
     networks:
       - internal
     volumes:
@@ -46,10 +50,13 @@ services:
 
   db-backup:
     image: mariadb:10
+    secrets:
+      - bookstack_mysql_user_pwd
+      - bookstack_mysql_root_pwd
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_PWD=/run/secrets/var_bookstack_mysql_root_pwd
-      - MYSQL_USER=${var_bookstack_mysql_backup_usr}
+      - MYSQL_PWD=/run/secrets/bookstack_mysql_root_pwd
+      - MYSQL_USER=${var_bookstack_mysql_root_usr}
       - BACKUP_NUM_KEEP=7
       - BACKUP_FREQUENCY=1d
     volumes:
@@ -75,4 +82,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 172.16.33.0/24
+        - subnet: ${ip_bookstack}/24

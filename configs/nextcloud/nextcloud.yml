@@ -2,21 +2,30 @@
 # ${configs_folder}/nextcloud/nextcloud.yml
 version: "3.4"
 
+secrets:
+  nextcloud_admin_pwd:
+    file: "${secrets_folder}/nextcloud_admin_pwd.secret"
+  nextcloud_mysql_pwd:
+    file: "${secrets_folder}/nextcloud_mysql_pwd.secret"
+  
 services:
   nextcloud:
     image: nextcloud:latest
+    secrets:
+      - nextcloud_admin_pwd
+      - nextcloud_mysql_pwd
     environment:
-      - NEXTCLOUD_ADMIN_USER=admin
-      - NEXTCLOUD_ADMIN_PASSWORD=nextcloud_password
+      - NEXTCLOUD_ADMIN_USER=${var_nextcloud_admin_usr}
+      - NEXTCLOUD_ADMIN_PASSWORD=/run/secrets/nextcloud_admin_pwd
       - NEXTCLOUD_TRUSTED_DOMAINS=${var_domain}
-      - MYSQL_HOST=db
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=dbpassword
-      - REDIS_HOST=redis
-      - REDIS_HOST_PORT:6379    
+      - MYSQL_HOST=${var_nextcloud_mysql_host}
+      - MYSQL_DATABASE=${var_nextcloud_db}
+      - MYSQL_USER=${var_nextcloud_mysql_usr}
+      - MYSQL_PASSWORD=/run/secrets/nextcloud_mysql_pwd
+      - REDIS_HOST=${var_nextcloud_redis_host}
+      - REDIS_HOST_PORT:${port_redis}
     ports:
-      - 11245:80
+      - ${port_nextcloud}:80
     volumes:
       - ${appdata_folder}/nextcloud:/var/www/html
       - ${appdata_folder}/nextcloud/apps:/var/www/html/custom_apps
@@ -31,7 +40,7 @@ services:
         - "traefik.http.routers.nextcloud.entrypoints=https"
         - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.${var_domain}`)"
         - "traefik.http.routers.nextcloud.tls.certresolver=${var_certresolver}"
-        - "traefik.http.services.nextcloud.loadbalancer.server.port=80"     
+        - "traefik.http.services.nextcloud.loadbalancer.server.port=${port_nextcloud_lb}"     
 
   adminer: 
     image: adminer:latest
@@ -45,16 +54,16 @@ services:
         - "traefik.http.routers.nextadmin.rule=Host(`nextadmin.${var_domain}`)"
         - "traefik.http.routers.nextadmin.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.nextadmin.middlewares=basic-auth@file"
-        - "traefik.http.services.nextadmin.loadbalancer.server.port=8080"    
+        - "traefik.http.services.nextadmin.loadbalancer.server.port=${port_adminer_lb}"    
 
   db:
     image: mariadb:10
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=dbpassword   
+      - MYSQL_ROOT_PASSWORD=/run/secrets/nextcloud_mysql_pwd
+      - MYSQL_DATABASE=${var_nextcloud_db}
+      - MYSQL_USER=${var_nextcloud_mysql_usr}
+      - MYSQL_PASSWORD=/run/secrets/nextcloud_mysql_pwd
     volumes:
       - ${runtime_folder}/nextcloud/db:/var/lib/mysql
     networks:
@@ -64,8 +73,8 @@ services:
     image: mariadb:10
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_PWD=root_password
-      - MYSQL_USER=root
+      - MYSQL_PWD=/run/secrets/nextcloud_mysql_pwd
+      - MYSQL_USER=${var_nextcloud_mysql_user}
       - BACKUP_NUM_KEEP=7
       - BACKUP_FREQUENCY=1d
     volumes:
@@ -128,4 +137,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 172.16.12.0/24
+        - subnet: ${ip_nextcloud}/24

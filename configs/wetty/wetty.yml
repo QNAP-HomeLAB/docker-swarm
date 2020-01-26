@@ -6,8 +6,8 @@ services:
   wetty:
     image: krishnasrinivas/wetty:latest
     environment:
-      SSHHOST: '${var_hostname'
-      SSHPORT: 4000
+      SSHHOST: '${var_hostname}'
+      SSHPORT: '${port_wetty_ssh}'
       SSHUSER: '${var_ssh_user}'
     networks:
       - traefik_public
@@ -18,7 +18,7 @@ services:
         - "traefik.http.routers.wetty.rule=Host(`wetty.${var_domain}`)"
         - "traefik.http.routers.wetty.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.wetty.middlewares=forward-auth@file"
-        - "traefik.http.services.wetty.loadbalancer.server.port=3000"       
+        - "traefik.http.services.wetty.loadbalancer.server.port=${port_wetty_lb}"
 
 networks:
   traefik_public:

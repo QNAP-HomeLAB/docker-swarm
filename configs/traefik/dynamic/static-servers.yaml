@@ -13,4 +13,4 @@ http:
     ${var_nas_name}:
       loadBalancer:
         servers:
-          - url: "https://${var_nas_ip}:8443"
+          - url: "https://${var_nas_ip}:${var_nas_port}"

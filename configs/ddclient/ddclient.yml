@@ -20,7 +20,7 @@ services:
         - "traefik.http.routers.ddclient.rule=Host(`ddclient.${var_domain}`)"
         - "traefik.http.routers.ddclient.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.ddclient.middlewares=forward-auth@file"
-        - "traefik.http.services.ddclient.loadbalancer.server.port=3000" 
+        - "traefik.http.services.ddclient.loadbalancer.server.port=${port_ddclient_lb}" 
 
 networks:
   traefik_public:

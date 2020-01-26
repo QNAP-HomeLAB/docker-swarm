@@ -7,7 +7,7 @@ http:
   middlewares:
     forward-auth:
       forwardAuth:
-        address: "http://${var_nas_ip}:8080/authorize"
+        address: "http://${var_nas_ip}:${port_forwardauth}/authorize"
         trustForwardHeader: true
         authResponseHeaders:
           - X-FORWARDAUTH-NAME

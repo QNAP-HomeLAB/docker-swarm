@@ -28,4 +28,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 172.16.68.0/24
+        - subnet: ${ip_ouroboros}/24

@@ -17,6 +17,9 @@ entryPoints:
       - "172.16.0.0/12"
       - "10.0.0.0/8"
       - "192.168.0.0/16"
+      - "192.168.100.0/16"
+      - "192.168.200.0/16"
+      - "192.168.186.0/16"
 
   https:
     address: ":443"
@@ -26,6 +29,9 @@ entryPoints:
       - "172.16.0.0/12"
       - "10.0.0.0/8"
       - "192.168.0.0/16"
+      - "192.168.100.0/16"
+      - "192.168.200.0/16"
+      - "192.168.186.0/16"
 
 providers:
   docker:
@@ -80,8 +86,8 @@ certificatesResolvers:
       # Alternative ACME Staging CA Server (not ratelimited like prod): 
       # caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
-        provider: cloudflare
+        provider: ${var_dns_provider}
         delayBeforeCheck: 0
         resolvers:
-        - "1.1.1.1:53"
-        - "8.8.8.8:53"
+        - "${var_dns1}"
+        - "${var_dns2}"

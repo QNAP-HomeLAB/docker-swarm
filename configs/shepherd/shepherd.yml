@@ -22,4 +22,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 172.16.48.0/24
+        - subnet: ${ip_shepherd}/24

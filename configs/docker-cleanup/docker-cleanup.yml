@@ -18,4 +18,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: 172.16.0.0/24
+        - subnet: ${ip_docker_cleanup}/24

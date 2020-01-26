@@ -9,19 +9,25 @@
 # The values below where you need to fill in your own values is found in Applications 
 # and Api in Auth0 management website.
 #
-domain: https://drauku.auth0.com/
-token-endpoint: https://drauku.auth0.com/oauth/token
-authorize-url: https://drauku.auth0.com/authorize
+domain: https://${var_auth0_tenant}.auth0.com/
+token-endpoint: https://${var_auth0_tenant}.auth0.com/oauth/token
+authorize-url: https://${var_auth0_tenant}.auth0.com/authorize
 
+secrets:
+  auth0_client_id:
+    file: "${secrets_folder}/auth0_client_id.secret"
+  auth0_client_secret:
+    file: "${secrets_folder}/auth0_client_secret.secret"
+  
 # default application that is hostname of received request does not
 # match any of the applications in the apps list will use, or if
 # properties in the matched application in the apps list is not present
 # the property value in the default app will be used instead.
 default:
   name: ${var_domain}
-  client-id: <redacted>
-  client-secret: <redacted>
-  audience: https://drauku.auth0.com/userinfo
+  client-id: /run/secrets/auth0_client_id
+  client-secret: /run/secrets/auth0_client_secret
+  audience: https://${var_auth0_tenant}.auth0.com/userinfo
   scope: "profile openid email"
   redirect-uri: https://auth.${var_domain}/signin
   token-cookie-domain: ${var_domain}

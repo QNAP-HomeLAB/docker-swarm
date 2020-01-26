@@ -16,7 +16,7 @@ services:
         - "traefik.http.routers.dozzle.rule=Host(`dozzle.${var_domain}`)"
         - "traefik.http.routers.dozzle.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.dozzle.middlewares=forward-auth@file"
-        - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+        - "traefik.http.services.dozzle.loadbalancer.server.port=${port_dozzle_lb}"
 
 networks:
   traefik_public:

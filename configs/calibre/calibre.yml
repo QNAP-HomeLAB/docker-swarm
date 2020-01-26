@@ -13,7 +13,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${appdata_folder}/calibre:/config
       # Set this next volume to wherever you store your Calibre library. From the container's perspective, this has to be /books/
-      - ${appdata_folder}/nextcloud/data/admin/files/Books:/books
+      - ${var_media_library}:/books
     networks:
       - traefik_public
     deploy:
@@ -23,7 +23,7 @@ services:
         - "traefik.http.routers.calibre.rule=Host(`library.${var_domain}`)"
         - "traefik.http.routers.calibre.tls.certresolver=${var_certresolver}"
         - "traefik.http.routers.calibre.middlewares=forward-auth@file"
-        - "traefik.http.services.calibre.loadbalancer.server.port=8083"
+        - "traefik.http.services.calibre.loadbalancer.server.port=${port_calibre}"
 
 networks:
   traefik_public:

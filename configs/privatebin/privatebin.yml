@@ -17,8 +17,8 @@ services:
         - "traefik.http.routers.paste.entrypoints=https"
         - "traefik.http.routers.paste.rule=Host(`whoami.${var_domain}`)"
         - "traefik.http.routers.paste.tls.certresolver=${var_certresolver}"
-        - "traefik.http.services.paste.loadbalancer.server.port=80"         
         - "traefik.http.routers.paste.middlewares=forward-auth@file"         
+        - "traefik.http.services.paste.loadbalancer.server.port=${port_privatebin_lb}"
 
 networks:
   traefik_public:
