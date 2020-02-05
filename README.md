@@ -1,3 +1,5 @@
+*** BE WARNED! THIS REPO IS UNDER ACTIVE DEVELOPMENT, AND PROBABLY WON'T WORK AS ANYTHING BUT SNIPPET EXAMPLES! ***
+
 Please consider joining and contributing to the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd).
 - You gain access to a community built around advice on everything QNAP.
 - Additional community resources: Subreddit, Blog, Wiki, FAQs, CI/CD, Community Docker images, etc.
@@ -15,11 +17,12 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
 - **Ports 80, 443, and 8080 *must be _unused_ by your NAS.*** 
   - By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide.
 - Modify these ports as follows to ensure there will be no port conflicts with docker stacks:
-  - **Change default System ports:** In QNAP GUI > General Settings, change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
-  - **Change default Web Application ports:** In QNAP GUI > General Settings > Applications > Web Server, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
+  - **Change default System ports:** In QNAP Web GUI, `Control Panel >> System >> General Settings`, change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
+  - **Change default Web Application ports:** In QNAP Web GUI, `Control Panel >> Applications >> Web Server`, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
   - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - **Ports 80 and 443 must be forwarded from your router to your NAS**. This is *possible* using UPNP in the QNAP GUI, but ***is not recommended!***
   - **Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
+  - ***NOTE:*** There are too many possible routers to cover how to forward ports on each, but there are some good guides here if you don't know how to do it for your router: (https://portforward.com/router.htm) or (https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/)
 
 **In sum:**
 - QTS System ports should be:
@@ -58,9 +61,9 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
 
 7. Create the following folder shares *using the QTS web-GUI* at `ControlPanel >> Privilege >> Shared Folders` and give _dockeruser_ Read/Write permissions:
   - `/share/swarm/appdata`
-    - Here we will add folders named < stack name >. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:/Windows/Program Files` and `C:\Users\<UserName>\AppData` in Windows.
+    - Here we will add folders named `< stack name >`. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:\Windows\Program Files` and `C:\Users\<UserName>\AppData` in Windows.
   - `/share/swarm/config`
-    - Here we will also add folders named < stack name >. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
+    - Here we will also add folders named `< stack name >`. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
   - `/share/swarm/runtime`
     - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
   - `/share/swarm/secrets`
@@ -89,9 +92,11 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
     - ***NOTE:*** You must have installed the `entware-std` package as detailed above in Section-2 Step-8 to be able to use the "opkg" installer.
 
 3. **TYPE:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
-    ***NOTE:*** If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.  
-  Please set the file format to UNIX (LF) in order for the profile and scripts to work correctly.
-  - Add the following lines to the end of the file and save:
+    - ***NOTE:*** If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.
+    - ***NOTE:*** **You MUST set the end of line format to UNIX (LF) in order for the profile and scripts to work correctly.**
+  
+  - Add the following lines to the end of the file and save.
+    - ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
 ```
 # docker_compose_dn -- stops the entered container
@@ -102,7 +107,6 @@ dcd(){
 dcu(){
   bash /share/swarm/scripts/docker_compose_up.sh "$1" 
 }
-
 # docker_stack_bounce -- removes then (re)deployes the listed stacks or '-all' stacks with config files in the folder structure
 dsb(){
   bash /share/swarm/scripts/docker_stack_bounce.sh "$1" 
@@ -130,12 +134,10 @@ dsr(){
 dsc(){
   bash /share/swarm/scripts/docker_stack_remove.sh -all
 }
-
 # docker_system_prune -- prunes the docker system (removes unused images and containers)
 dprn(){
   bash /share/swarm/scripts/docker_system_prune.sh 
 }
-
 # docker_swarm_setup -- creates a new swarm and overlay network, then starts all declared stacks if desired
 dwup(){
   bash /share/swarm/scripts/docker_swarm_setup.sh "$1"
@@ -166,15 +168,15 @@ dwrm(){
       - **SYNTAX:** `dsd traefik`
       - **SYNTAX:** `dsd -default`
       - **SYNTAX:** `dsd -all`
-  - `dsu` -- docker_stack_up - deploys all stacks defined in stackvars.conf
-      - **SYNTAX:** 'dsu' (same as `dsd -all`)
+  - `dsu` -- docker_stack_up - deploys all stacks defined in `/share/swarm/configs/swarm_stacks.conf`
+      - **SYNTAX:** `dsu` (same as `dsd -all`)
   - `dsf` -- docker_stack_folders - creates the folder structure for (1 - 9 listed) stacks
     - **SYNTAX:** `dsf plex sonarr radarr lidarr bazarr ombi`
       - creates the below three folders for each listed stack:
         - `/share/swarm/appdata/appname`
         - `/share/swarm/configs/appname`
         - `/share/swarm/runtime/appname`
-  - `dsr` -- docker_stack_remove - removes a single stack, or all stacks
+  - `dsr` -- docker_stack_remove - removes a single stack, or all stacks listed via `docker stack ls`
     - **SYNTAX:** `dsr openvpn`
     - **SYNTAX:** `dsr -all`
   - `dsc` -- docker_stack_clear - removes all stacks
@@ -184,13 +186,11 @@ dwrm(){
       - **SYNTAX:** `dwup`
   - `dwlv` -- docker_swarm_leave - prunes docker system, leaves swarm - USE WITH CAUTION!
       - **SYNTAX:** `dwlv`
-  - `dwrm` -- docker_swarm_remove - removes all stacks, prunes docker system - USE WITH CAUTION!
+  - `dwrm` -- docker_swarm_remove - removes all stacks, prunes docker system, leaves swarm - USE WITH CAUTION!
       - **SYNTAX:** `dwrm` (same as `dwlv -all`)
 
   - `dprn` -- docker_system_prune - prunes the Docker system of unused images, networks, and containers
       - **SYNTAX:** `dprn`
-
-  ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
   **See below** in Section-6 and Section-7 for script files that need to be created and added to `/share/swarm/scripts` folder.
       * These script files are required in order to utilize the above shortcut commands.
