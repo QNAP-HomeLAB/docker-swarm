@@ -150,6 +150,9 @@ dwlv(){
 dwrm(){
   bash /share/swarm/scripts/docker_swarm_leave.sh -all
 }
+dwinit(){
+  bash mkdir -pm 777 /share/swarm/{appdata,configs,runtime,scripts,secrets}
+}
 ```
 
 - Remember these shortcut names, (defined by the above shortcuts which point to required scripts, listed below):
