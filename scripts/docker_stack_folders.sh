@@ -22,7 +22,7 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/scripts/script_vars.conf
+  source /share/swarm/configs/swarm_vars.conf
 
 # Print helpFunction in case parameters are empty, or -h option entered
   if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
@@ -38,12 +38,11 @@ helpFunction(){
   echo " - $@"
   echo
 
-# Change all swarm folders to the 'user:group' to the 'dockuser' and appropriate group number
-  chown -R $var_usr:$var_grp $swarm_folder
-  chmod -R 640 $swarm_folder
-  echo "FOLDER OWNERSHIP UPDATED"
-  echo 
+# Change all swarm folders to the 'dockuser' 'user:group' values
+  #chown -R $var_user:$var_group $swarm_folder
+  #echo "FOLDER OWNERSHIP UPDATED"
+  #echo 
 
 # Print script complete message
-  echo "DOCKER SWARM STACKS FOLDER STRUCTURE CREATION SCRIPT COMPLETE"
+  echo "DOCKER SWARM STACKS FOLDER CREATION SCRIPT COMPLETE"
   echo

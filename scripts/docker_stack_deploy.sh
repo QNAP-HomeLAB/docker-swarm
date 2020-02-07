@@ -9,8 +9,8 @@ helpFunction(){
   echo "SYNTAX: # dsd -option"
   echo "  VALID OPTIONS:"
   echo "        -all          Deploys all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Deploys stacks listed in the '../configs/swarm_stacks.conf' config file 'stacks_listed' array."
-  echo "        -default      Deploys the 'default' list of stacks defined in the '../configs/swarm_vars.conf' variable file"
+  echo "        -listed       Deploys the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "        -default      Deploys the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
@@ -18,17 +18,16 @@ helpFunction(){
 
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
-  source /share/swarm/scripts/script_vars.conf
+  source /share/swarm/configs/swarm_vars.conf
   deploy_list=""
-
-# Make sure the $swarm_folder structure is usable by the `dockuser` username and group
-  chown -R $var_usr:$var_grp $swarm_folder
-  chmod -R 640 $swarm_folder # OWNER: Read/Write, GROUP: Read
 
 # Define which stack(s) to load using command options
   if [[ $1 = "-all" ]]; then
     if [[ "${bounce_list[@]}" = "" ]]; then
-      IFS=$'\n' deploy_list=( "${stacks_all[@]}" );
+      IFS=$'\n' deploy_list=( $(cd ${configs_folder} && find -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g') );
+      if [[ "${deploy_list[i]}" = "." ]]; then
+        unset 'deploy_list[i]'
+      fi
     else
       IFS=$'\n' deploy_list=( "${bounce_list[@]}" );
     fi
@@ -36,7 +35,7 @@ helpFunction(){
     IFS=$'\n' deploy_list=( "${stacks_listed[@]}" );
   elif [[ $1 = "-default" ]]; then
     IFS=$'\n' deploy_list=( "${stacks_default[@]}" );
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     # Print helpFunction in case parameters are empty
     helpFunction
   else
@@ -76,10 +75,18 @@ helpFunction(){
 # Deploy indicated stack(s)
   for stack in "${deploy_list[@]}"; do
     echo "*** DEPLOYING '$stack' ***"
-    ln -sf ../$variables_file $configs_folder/${stack}/.env
+    # The below two lines are needed only if '.env' file redirect is used
+    #ln -sf $configs_folder/$variables_file $configs_folder/${stack}/.env
+    #sleep 1
     docker stack deploy $stack -c ${configs_folder}/${stack}/${stack}.yml
-    echo "**** '$stack' DEPLOYED, WAITING 10 SECONDS ****"
-    sleep 10
+    sleep 1
+    if [ "$(docker service ls --filter name=$stack -q)" = "" ]; then
+      echo
+      echo "**** ... ERROR ... '$stack' *NOT* DEPLOYED! ****"
+    else
+      echo "**** '$stack' DEPLOYED, WAITING 10 SECONDS ****"
+      sleep 10
+    fi
   done
 
 # Clear the 'deploy_list' array now that we are done with it

@@ -9,13 +9,14 @@ helpFunction(){
   echo "SYNTAX: # dwlv -option"
   echo "  VALID OPTIONS:"
   echo "        -all          Removes all stacks with a corresponding folder inside the '../configs/' path, then laves the Docker Swarm."
+  echo "        -noremove     Does *NOT* remove any currently deployed stacks, but still leaves the swarm"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
   }
 
 # Load config variables from file
-  source /share/swarm/scripts/script_vars.conf
+  source /share/swarm/configs/swarm_vars.conf
 
 # Check for '-noremove' command options
   if [[ "$1" = "-noremove" ]] ; then
