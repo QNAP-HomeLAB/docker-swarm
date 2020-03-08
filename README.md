@@ -99,6 +99,10 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
     - ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
 ```
+# docker_commands_list -- lists the below custom docker commands
+dlist(){
+  bash /share/swarm/scripts/docker_commands_list.sh
+}
 # docker_compose_dn -- stops the entered container
 dcd(){
   bash /share/swarm/scripts/docker_compose_dn.sh "$1" 
@@ -157,6 +161,7 @@ dwinit(){
 
 - Remember these shortcut names, (defined by the above shortcuts which point to required scripts, listed below):
 
+  - `dlist` -- docker_commands_list - lists the custom Docker Swarm commands created for managing a QNAP Docker Swarm"
   - `dcd` -- docker_compose_dn - stops (brings 'down') a docker-compose container
       - **SYNTAX:** `dcd traefik`
   - `dcu` -- docker_compose_up - starts (brings 'up') a docker-compose container
