@@ -11,9 +11,13 @@ So no more TOML necessary, but it is supported.
 First - let's talk differences - everything is more cleanly laid out. 
 
 There may be a couple bugs (or mistakes in my usage someone can identify), but otherwise I have all known use cases working.
-I think so, yes @Darth-Penguini
-Can you can "chain" "chains"
+
+I think so, yes 
+
+@Darth-Penguini "Can you can 'chain' 'chains' "
+
 And you can.
+
 The ONLY weakness is that I wish `tls.certresolver` could be defined in a middleware - but more on that later.
 
 I'll start by explaining the traefik.yml file, highlighting differences.
