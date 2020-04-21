@@ -1,9 +1,9 @@
 # shepherd Recipe
-# ${configs_folder}/shepherd/shepherd.yml
+# /share/swarm/configs/shepherd/shepherd.yml
 version: "3.4"
 
 services:
-  shepherd:
+  app:
     image: mazzolino/shepherd:latest
     environment:
       # Run every 24 hours. I really don't need new images more frequently than that.
@@ -22,4 +22,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_shepherd}/24
+        - subnet: 172.16.48.0/24

@@ -1,29 +1,29 @@
 # Calibre Recipe
-# ${configs_folder}/calibre/calibre.yml
+# /share/swarm/appdata/config/calibre/calibre.yml
 version: "3.4"
 
 services:
-  calibre:
+  app:
     image: linuxserver/calibre-web:latest
     environment:
-      - PGID=${var_grp}
-      - PUID=${var_usr}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PGID=1000
+      - PUID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${appdata_folder}/calibre:/config
+      - /share/swarm/appdata/calibre:/config
       # Set this next volume to wherever you store your Calibre library. From the container's perspective, this has to be /books/
-      - ${var_media_library}:/books
+      - /share/swarm/appdata/nextcloud/data/admin/files/Books:/books
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.calibre.entrypoints=https"
-        - "traefik.http.routers.calibre.rule=Host(`library.${var_domain}`)"
-        - "traefik.http.routers.calibre.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.calibre.rule=Host(`library.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.calibre.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.calibre.middlewares=forward-auth@file"
-        - "traefik.http.services.calibre.loadbalancer.server.port=${port_calibre}"
+        - "traefik.http.services.calibre.loadbalancer.server.port=8083"
 
 networks:
   traefik_public:

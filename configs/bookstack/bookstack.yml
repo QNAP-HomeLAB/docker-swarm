@@ -1,24 +1,23 @@
 # Bookstack Recipe
-# ${configs_folder}/diskover/bookstack.yml
+# /share/swarm/appdata/config/diskover/bookstack.yml
 version: "3.4"
 
 secrets:
-  bookstack_mysql_user_pwd:
-    file: "${secrets_folder}/bookstack_mysql_user_pwd.secret"
-  bookstack_mysql_root_pwd:
-    file: "${secrets_folder}/bookstack_mysql_root_pwd.secret"
-    
+  db_pwd_root:
+    file: "/share/swarm/secrets/mariadb_pwd_root.secret"
+  db_pwd_bookstack:
+    file: "/share/swarm/secrets/mariadb_pwd_bookstack.secret"
+
 services:
   app:
     image: solidnerd/bookstack:latest
     secrets:
-      - bookstack_mysql_user_pwd
-      - bookstack_mysql_root_pwd
+      - mariadb_pwd_bookstack
     environment:
       - DB_HOST=db:3306
-      - DB_DATABASE=${var_bookstack_mysql_db}
-      - DB_USERNAME=${var_bookstack_mysql_usr}
-      - DB_PASSWORD=/run/secrets/bookstack_mysql_user_pwd
+      - DB_DATABASE=bookstackdb
+      - DB_USERNAME=bookstack
+      - DB_PASSWORD=/run/secrets/mariadb_pwd_bookstack
     volumes:
       - /etc/localtime:/etc/localtime:ro
     networks:
@@ -28,39 +27,38 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.bookstack.entrypoints=https"
-        - "traefik.http.routers.bookstack.rule=Host(`bookstack.${var_domain}`)"
-        - "traefik.http.routers.bookstack.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.bookstack.rule=Host(`bookstack.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.bookstack.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.services.bookstack.loadbalancer.server.port=80"
 
   db:
     image: mariadb:10
     secrets:
-      - bookstack_mysql_user_pwd
-      - bookstack_mysql_root_pwd
+      - mariadb_pwd_root
+      - mariadb_pwd_bookstack
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=/run/secrets/bookstack_mysql_root_pwd
-      - MYSQL_DATABASE=${var_bookstack_mysql_db}
-      - MYSQL_USER=${var_bookstack_mysql_usr}
-      - MYSQL_PASSWORD=/run/secrets/bookstack_mysql_user_pwd
+      - MYSQL_RANDOM_ROOT_PASSWORD=/run/secrets/mariadb_pwd_root
+      - MYSQL_DATABASE=bookstackdb
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD=/run/secrets/mariadb_pwd_bookstack
     networks:
       - internal
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${runtime_folder}/bookstack/db:/var/lib/mysql
+      - /share/swarm/runtime/bookstack/mariadb:/var/lib/mysql
 
   db-backup:
     image: mariadb:10
     secrets:
-      - bookstack_mysql_user_pwd
-      - bookstack_mysql_root_pwd
+      - mariadb_pwd_root
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_PWD=/run/secrets/bookstack_mysql_root_pwd
-      - MYSQL_USER=${var_bookstack_mysql_root_usr}
+      - MYSQL_PWD=/run/secrets/mariadb_pwd_root
+      - MYSQL_USER=root
       - BACKUP_NUM_KEEP=7
       - BACKUP_FREQUENCY=1d
     volumes:
-      - ${appdata_folder}/bookstack/database-dump:/dump
+      - /share/swarm/appdata/bookstack/database-dump:/dump
       - /etc/localtime:/etc/localtime:ro
     entrypoint: |
       bash -c 'bash -s <<EOF
@@ -82,4 +80,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_bookstack}/24
+        - subnet: 172.16.33.0/24

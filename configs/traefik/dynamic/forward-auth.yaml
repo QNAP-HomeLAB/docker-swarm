@@ -1,13 +1,13 @@
 # Traefik Dynamic Configuration
 # Middleware: Forward Auth
-# Host Path: ${configs_folder}/traefik/dynamic/forward-auth.yaml
+# Host Path: /share/swarm/appdata/config/traefik/dynamic/forward-auth.yaml
 # Internal Path: /etc/traefik/dynamic/forward-auth.yaml
 
 http:
   middlewares:
     forward-auth:
       forwardAuth:
-        address: "http://${var_nas_ip}:${port_forwardauth}/authorize"
+        address: "http://MY.NAS.LAN.IP:8080/authorize"
         trustForwardHeader: true
         authResponseHeaders:
           - X-FORWARDAUTH-NAME

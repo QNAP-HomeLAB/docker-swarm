@@ -1,114 +1,118 @@
 # Plex Recipe
-# ${configs_folder}/plex/plex.yml
+# /share/swarm/configs/plex/plex.yml
 version: "3.4"
 
 services:
-  plex:
+  app:
     image: linuxserver/plex:latest
     environment:
       - VERSION=docker
-      - PUID=${var_usr}
-      - PGID=${var_grp}
+      - PUID=1000
+      - PGID=100
     ports:
-      - "${port_plex_web}:32400"
-      - "${port_plex_remote}:32401"
-      - "${port_plex_dlna}:32469"
-      - "${port_plex_tools1}:33400"
-      - "${port_plex_tools2}:33443"
-      - "${port_plex_companion}:3005"
-      - "${port_plex_roku}:8324"
-      - "${port_plex_avahi}:5353/udp"
-      - "${port_plex_dlna_svr}:1900/udp"
-      - "${port_plex_web}:32400/udp"
-      - "${port_plex_dlna}:32469/udp"
-      - "${port_plex_gdm0}:32410/udp"
-      - "${port_plex_gdm2}:32412/udp"
-      - "${port_plex_gdm3}:32413/udp"
-      - "${port_plex_gdm4}:32414/udp"
+      - 32469:32469
+      - 32400:32400
+      - 32401:32401
+      - 33400:33400
+      - 33443:33443
+      - 3005:3005
+      - 8324:8324
+      - 5353:5353/udp
+      - 1900:1900/udp
+      - 32400:32400/udp
+      - 32469:32469/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
     networks:
       - traefik_public        
     volumes:
       - /etc/timezone:/etc/timezone:ro
-      - ${appdata_folder}/plex:/config
-      - ${media_videos_folder}:/data
-      - ${runtime_folder}/plex/transcode:/transcode
+      - /share/swarm/appdata/plex:/config
+      - /share/media/videos:/data
+      - /share/swarm/runtime/plex/transcode:/transcode
     deploy:
       labels:     
         - "traefik.enable=true"
         # First, we need a router for Plex that uses SSL.
         - "traefik.http.routers.plex.entrypoints=https"
-        - "traefik.http.routers.plex.rule=Host(`plex.${var_domain}`)"
-        - "traefik.http.routers.plex.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.plex.rule=Host(`plex.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.plex.tls.certresolver=MYCERTRESOLVER"
         # We do NOT want forward-auth enabled for Plex, as it has it's own 
         # authorization/authentication.
         #- "traefik.http.routers.plex.middlewares=forward-auth@file"
-        - "traefik.http.services.plex.loadbalancer.server.port=${port_plex_web}" 
+        - "traefik.http.services.plex.loadbalancer.server.port=32400" 
         # Next, we need a router (which has authentication) for webtools plugin
         # own authorization/authentication.
         - "traefik.http.routers.webtools.entrypoints=https"
-        - "traefik.http.routers.webtools.rule=Host(`webtools.${var_domain}`)"
-        - "traefik.http.routers.webtools.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.webtools.rule=Host(`webtools.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.webtools.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.webtools.middlewares=forward-auth@file"
-        - "traefik.http.services.webtools.loadbalancer.server.port=${port_webtools}" 
+        - "traefik.http.services.webtools.loadbalancer.server.port=33400" 
 
   synclounge:
     image: starbix/synclounge:latest
     ports:
-      - ${port_synclounge}:8088
-      - ${port_synclounge_svr}:8089
+      - 8088:8088
+      - 8089:8089
     environment:
-      - DOMAIN=lounge.${var_domain}
+      - DOMAIN=lounge.MYDOMAIN.TLD
     deploy:
       labels:
         - "traefik.enable=true"
         # We want to expose synclounge via http, so we need to specify an 
         # http endpoint for it and be sure not to redirect.        
         - "traefik.http.routers.synclounge.entrypoints=http"
-        - "traefik.http.routers.synclounge.rule=Host(`synclounge.${var_domain}`)"
-        - "traefik.http.services.synclounge.loadbalancer.server.port=${port_synclounge}"
+        - "traefik.http.routers.synclounge.rule=Host(`lounge.MYDOMAIN.TLD`)"
+        - "traefik.http.services.synclounge.loadbalancer.server.port=8088" 
         # We want to expose the synclounge server via http, so we need
         # to specify an http endpoint for it and be sure not to redirect.    
         - "traefik.http.routers.slserver.entrypoints=http"
-        - "traefik.http.routers.slserver.rule=Host(`slserver.${var_domain}`)"
-        - "traefik.http.services.slserver.loadbalancer.server.port=${port_synclounge_svr}"
+        - "traefik.http.routers.slserver.rule=Host(`slserver.MYDOMAIN.TLD`)"
+        - "traefik.http.services.slserver.loadbalancer.server.port=8089"        
 
   tautulli:
     image: linuxserver/tautulli:latest
-    env_file: ${configs_folder}/plex/tautulli.env
+    environment:
+      - PUID=1000
+      - PGID=100
+      - TZ="America/Chicago"
+    #env_file: /share/swarm/configs/plex/tautulli.env
     ports:
       - 8181:8181
     volumes:
-      - ${media_videos_folder}:/data
-      - ${appdata_folder}/plex/tautulli:/config
+      - /share/media:/data
+      - /share/swarm/appdata/plex/tautulli:/config
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.tautulli.entrypoints=https"
-        - "traefik.http.routers.tautulli.rule=Host(`tautulli.${var_domain}`)"
-        - "traefik.http.routers.tautulli.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.tautulli.rule=Host(`tautulli.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.tautulli.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.tautulli.middlewares=forward-auth@file"
-        - "traefik.http.services.tautulli.loadbalancer.server.port=${port_tautulli}"
+        - "traefik.http.services.tautulli.loadbalancer.server.port=8181" 
 
   nowshowing:
     image: ninthwalker/nowshowing:v2
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ="${var_tz_region}/${var_tz_city}"
+      - PUID=1000
+      - PGID=100
+      - TZ="America/Chicago"
     volumes:
-      - ${appdata_folder}/plex/nowshowing:/config:rw
+      - /share/swarm/appdata/nowshowing/config:/config:rw
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.nowshowing.entrypoints=https"
-        - "traefik.http.routers.nowshowing.rule=Host(`nowshowing.${var_domain}`)"
-        - "traefik.http.routers.nowshowing.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.nowshowing.rule=Host(`nowshowing.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.nowshowing.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.nowshowing.middlewares=forward-auth@file"
-        - "traefik.http.services.nowshowing.loadbalancer.server.port=${port_nowshowing}"
+        - "traefik.http.services.nowshowing.loadbalancer.server.port=6878" 
 
 networks:
   traefik_public:
@@ -117,4 +121,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_plex}/24
+        - subnet: 172.16.16.0/24

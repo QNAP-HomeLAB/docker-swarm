@@ -1,6 +1,6 @@
 # Traefik Dynamic Configuration
 # Services: Static (Non-Docker) Services
-# Host Path: ${configs_folder}/traefik/dynamic/static-servers.yaml
+# Host Path: /share/swarm/appdata/config/traefik/dynamic/static-servers.yaml
 # Internal Path: /etc/traefik/dynamic/static-servers.yaml
 
 http:
@@ -10,7 +10,7 @@ http:
         servers:
           - url: "http://127.0.0.1"
 
-    ${var_nas_name}:
+    mynasname:
       loadBalancer:
         servers:
-          - url: "https://${var_nas_ip}:${var_nas_port}"
+          - url: "https://MY.NAS.LAN.IP:8443"

@@ -1,6 +1,6 @@
 # Traefik Dynamic Configuration
 # Routers: Global HTTP -> HTTPS Redirect
-# Host Path: ${configs_folder}/traefik/dynamic/globalredirect.yaml
+# Host Path: /share/swarm/appdata/config/traefik/dynamic/globalredirect.yaml
 # Internal Path: /etc/traefik/dynamic/globalredirect.yaml
 
 http:

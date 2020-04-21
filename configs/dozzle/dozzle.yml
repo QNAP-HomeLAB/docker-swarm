@@ -1,5 +1,5 @@
 # Dozzle Recipe
-# ${configs_folder}/dozzle/dozzle.yml
+# /share/swarm/appdata/config/dozzle/dozzle.yml
 version: "3.4"
 
 services:
@@ -13,10 +13,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.dozzle.entrypoints=https"
-        - "traefik.http.routers.dozzle.rule=Host(`dozzle.${var_domain}`)"
-        - "traefik.http.routers.dozzle.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.dozzle.rule=Host(`dozzle.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.dozzle.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.dozzle.middlewares=forward-auth@file"
-        - "traefik.http.services.dozzle.loadbalancer.server.port=${port_dozzle_lb}"
+        - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
 
 networks:
   traefik_public:

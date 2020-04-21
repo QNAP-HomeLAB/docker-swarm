@@ -1,26 +1,26 @@
 # DDClient Recipe
-# ${configs_folder}/ddclient/cddclient.yml
+# /share/swarm/configs/ddclient/cddclient.yml
 version: "3.4"
 
 services:
-  ddclient:
+  app:
     image: linuxserver/ddclient:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
-      - ${appdata_folder}/ddclient/config:/config
+      - /share/swarm/appdata/ddclient/config:/config
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.ddclient.entrypoints=https"
-        - "traefik.http.routers.ddclient.rule=Host(`ddclient.${var_domain}`)"
-        - "traefik.http.routers.ddclient.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.ddclient.rule=Host(`ddclient.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.ddclient.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.ddclient.middlewares=forward-auth@file"
-        - "traefik.http.services.ddclient.loadbalancer.server.port=${port_ddclient_lb}" 
+        - "traefik.http.services.ddclient.loadbalancer.server.port=3000" 
 
 networks:
   traefik_public:

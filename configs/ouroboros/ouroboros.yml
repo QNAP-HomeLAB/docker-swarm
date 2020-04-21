@@ -1,5 +1,5 @@
 # ouroboros Recipe
-# ${configs_folder}/ouroboros/ouroboros.yml
+# /share/swarm/appdata/config/ouroboros/ouroboros.yml
 version: "3.4"
 
 services:
@@ -7,11 +7,13 @@ services:
     image: pyouroboros/ouroboros:latest
     environment:
       - CLEANUP=true
-      - INTERVAL=300
-      # - SELF_UPDATE=true
-      - TZ=${var_tz_region}/${var_tz_city}
+      #- INTERVAL=300
+      # 5 minutes is way too short an interval, daily is adequate
+      - INTERVAL=86400
+      #- SELF_UPDATE=true
+      - TZ=America/Chicago
       - LABEL_ENABLE=true
-      # - NOTIFIERS="mailtos://${var_domain}:${secret_gmail_pswd}?to=${var_target_email}"
+      #- NOTIFIERS="mailtos://ouroboros@mail.MYDOMAIN.TLD:0ur0b0r0$PWD?to=myusername@gmail.com"
       - SWARM=true
       - SKIP_STARTUP_NOTIFICATIONS=false
     volumes:
@@ -28,4 +30,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_ouroboros}/24
+        - subnet: 172.16.68.0/24

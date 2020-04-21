@@ -1,76 +1,76 @@
 # Autopirate Recipe
-# ${configs_folder}/autopirate/autopirate.yml
+# /share/swarm/configs/autopirate/autopirate.yml
 version: "3.4"
 
 services:
   heimdall:
     image: linuxserver/heimdall:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:    
-      - ${appdata_folder}/heimdall:/config
+      - /share/swarm/appdata/heimdall:/config
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.heimdall.entrypoints=https"
-        - "traefik.http.routers.heimdall.rule=Host(`heimdall.${var_domain}`)"
-        - "traefik.http.routers.heimdall.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.heimdall.rule=Host(`heimdall.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.heimdall.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.heimdall.middlewares=forward-auth@file"
         - "traefik.http.services.heimdall.loadbalancer.server.scheme=https"       
-        - "traefik.http.services.heimdall.loadbalancer.server.port=${port_heimdall}"
+        - "traefik.http.services.heimdall.loadbalancer.server.port=443"           
        
   oscarr:
     image: morpheus65535/oscarr:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
-      - ${appdata_folder}/autopirate/oscarr:/oscarr/data
+      - /share/swarm/appdata/autopirate/oscarr:/oscarr/data
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.oscarr.entrypoints=https"
-        - "traefik.http.routers.oscarr.rule=Host(`oscarr.${var_domain}`)"
-        - "traefik.http.routers.oscarr.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.oscarr.rule=Host(`oscarr.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.oscarr.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.oscarr.middlewares=forward-auth@file"
-        - "traefik.http.services.oscarr.loadbalancer.server.port=${port_oscarr}" 
+        - "traefik.http.services.oscarr.loadbalancer.server.port=5656" 
          
   ombi:
     image: linuxserver/ombi:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro    
-      - ${appdata_folder}/autopirate/ombi:/config
+      - /share/swarm/appdata/autopirate/ombi:/config
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.ombi.entrypoints=https"
-        - "traefik.http.routers.ombi.rule=Host(`ombi.${var_domain}`)"
-        - "traefik.http.routers.ombi.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.ombi.rule=Host(`ombi.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.ombi.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.ombi.middlewares=forward-auth@file"
-        - "traefik.http.services.ombi.loadbalancer.server.port=${port_ombi}" 
+        - "traefik.http.services.ombi.loadbalancer.server.port=3579" 
         
   headphones:
     image: linuxserver/headphones:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
-      - ${var_media_music}:/music
-      - ${appdata_folder}/autopirate/headphones:/config
+      - /share/media/audio:/music
+      - /share/swarm/appdata/autopirate/headphones:/config
       - /share/downloads:/downloads
     networks:
       - traefik_public
@@ -78,21 +78,21 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.headphones.entrypoints=https"
-        - "traefik.http.routers.headphones.rule=Host(`headphones.${var_domain}`)"
-        - "traefik.http.routers.headphones.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.headphones.rule=Host(`headphones.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.headphones.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.headphones.middlewares=forward-auth@file"
-        - "traefik.http.services.headphones.loadbalancer.server.port=${port_headphones}" 
+        - "traefik.http.services.headphones.loadbalancer.server.port=8181" 
 
   sonarr:
     image: linuxserver/sonarr:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${var_media_shows}:/tv
-      - ${appdata_folder}/autopirate/sonarr:/config
+      - /share/media/videos/shows:/tv
+      - /share/swarm/appdata/autopirate/sonarr:/config
       - /share/downloads:/downloads
     networks:
       - traefik_public
@@ -100,20 +100,20 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.sonarr.entrypoints=https"
-        - "traefik.http.routers.sonarr.rule=Host(`sonarr.${var_domain}`)"
-        - "traefik.http.routers.sonarr.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.sonarr.rule=Host(`sonarr.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.sonarr.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.sonarr.middlewares=forward-auth@file"
-        - "traefik.http.services.sonarr.loadbalancer.server.port=${port_sonarr}" 
+        - "traefik.http.services.sonarr.loadbalancer.server.port=8989" 
          
   radarr:
     image: linuxserver/radarr:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
-      - ${var_media_movies}:/movies
-      - ${appdata_folder}/autopirate/radarr:/config
+      - /share/media/videos/movies:/movies
+      - /share/swarm/appdata/autopirate/radarr:/config
       - /share/downloads:/downloads
     networks:
       - traefik_public 
@@ -121,22 +121,22 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.radarr.entrypoints=https"
-        - "traefik.http.routers.radarr.rule=Host(`radarr.${var_domain}`)"
-        - "traefik.http.routers.radarr.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.radarr.rule=Host(`radarr.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.radarr.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.radarr.middlewares=forward-auth@file"
-        - "traefik.http.services.radarr.loadbalancer.server.port=${port_radarr}"  
+        - "traefik.http.services.radarr.loadbalancer.server.port=7878"  
       
   bazarr:
     image: linuxserver/bazarr:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
       - UMASK_SET=022
     volumes:
-      - /share/media/tv:/tv
-      - /share/media/movies:/movies
-      - ${appdata_folder}/autopirate/bazarr:/config
+      - /share/media/videos/shows:/tv
+      - /share/media/videos/movies:/movies
+      - /share/swarm/appdata/autopirate/bazarr:/config
       - /share/downloads:/downloads
     networks:
       - traefik_public
@@ -144,21 +144,21 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.bazarr.entrypoints=https"
-        - "traefik.http.routers.bazarr.rule=Host(`bazarr.${var_domain}`)"
-        - "traefik.http.routers.bazarr.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.bazarr.rule=Host(`bazarr.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.bazarr.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.bazarr.middlewares=forward-auth@file"
-        - "traefik.http.services.bazarr.loadbalancer.server.port=${port_bazarr}"        
+        - "traefik.http.services.bazarr.loadbalancer.server.port=6767"        
         
   lidarr:
     image: linuxserver/lidarr:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /share/media/music:/music
-      - ${appdata_folder}/autopirate/lidarr:/config      
+      - /share/media/audio:/music
+      - /share/swarm/appdata/autopirate/lidarr:/config      
       - /share/downloads:/downloads
     networks:
       - traefik_public
@@ -166,41 +166,41 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.lidarr.entrypoints=https"
-        - "traefik.http.routers.lidarr.rule=Host(`lidarr.${var_domain}`)"
-        - "traefik.http.routers.lidarr.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.lidarr.rule=Host(`lidarr.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.lidarr.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.lidarr.middlewares=forward-auth@file"
-        - "traefik.http.services.lidarr.loadbalancer.server.port=${port_lidarr}"       
+        - "traefik.http.services.lidarr.loadbalancer.server.port=8686"       
 
   lazylibrarian:
     image: linuxserver/lazylibrarian:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${appdata_folder}/autopirate/lazylibrarian:/config
+      - /share/swarm/appdata/autopirate/lazylibrarian:/config
       - /share/downloads:/downloads
-      - ${appdata_folder}/autopirate/lazylibrarian/books:/books
+      - /share/swarm/appdata/autopirate/lazylibrarian/books:/books
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.lazylibrarian.entrypoints=https"
-        - "traefik.http.routers.lazylibrarian.rule=Host(`lazylibrarian.${var_domain}`)"
-        - "traefik.http.routers.lazylibrarian.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.lazylibrarian.rule=Host(`lazylibrarian.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.lazylibrarian.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.lazylibrarian.middlewares=forward-auth@file"
-        - "traefik.http.services.lazylibrarian.loadbalancer.server.port=${port_lazylibrarian}"     
+        - "traefik.http.services.lazylibrarian.loadbalancer.server.port=5299"     
                  
   nzbhydra:
     image: linuxserver/hydra2:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
-      - ${appdata_folder}/autopirate/nzbhydra:/config
+      - /share/swarm/appdata/autopirate/nzbhydra:/config
       - /share/downloads:/downloads
     networks:
       - traefik_public
@@ -208,20 +208,20 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.hydra2.entrypoints=https"
-        - "traefik.http.routers.hydra2.rule=Host(`hydra2.${var_domain}`)"
-        - "traefik.http.routers.hydra2.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.hydra2.rule=Host(`hydra2.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.hydra2.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.hydra2.middlewares=forward-auth@file"
-        - "traefik.http.services.hydra2.loadbalancer.server.port=${port_nzbhydra}"      
+        - "traefik.http.services.hydra2.loadbalancer.server.port=5076"      
 
   nzbget:
     image: linuxserver/nzbget:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro      
-      - ${appdata_folder}/autopirate/nzbget:/config
+      - /share/swarm/appdata/autopirate/nzbget:/config
       - /share/downloads:/downloads     
     networks:
       - traefik_public
@@ -229,20 +229,20 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.nzbget.entrypoints=https"
-        - "traefik.http.routers.nzbget.rule=Host(`nzbget.${var_domain}`)"
-        - "traefik.http.routers.nzbget.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.nzbget.rule=Host(`nzbget.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.nzbget.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.nzbget.middlewares=forward-auth@file"
-        - "traefik.http.services.nzbget.loadbalancer.server.port=${port_nzbget}"        
+        - "traefik.http.services.nzbget.loadbalancer.server.port=6789"        
        
   jackett:
     image: linuxserver/jackett:latest
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${appdata_folder}/autopirate/jackett:/config
+      - /share/swarm/appdata/autopirate/jackett:/config
       - /share/downloads:/downloads      
     networks:
       - traefik_public
@@ -250,10 +250,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.jackett.entrypoints=https"
-        - "traefik.http.routers.jackett.rule=Host(`jackett.${var_domain}`)"
-        - "traefik.http.routers.jackett.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.jackett.rule=Host(`jackett.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.jackett.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.jackett.middlewares=forward-auth@file"
-        - "traefik.http.services.jackett.loadbalancer.server.port=${port_jackett}"            
+        - "traefik.http.services.jackett.loadbalancer.server.port=9117"            
       
 networks:
   traefik_public:

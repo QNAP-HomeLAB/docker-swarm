@@ -1,23 +1,23 @@
 # BitWarden Recipe
-# ${configs_folder}/bitwarden/bitwarden.yml
+# /share/swarm/configs/bitwarden/bitwarden.yml
 version: "3.4"
 
 services:
-  bitwarden:
+  app:
     image: mprasil/bitwarden:latest
     environment:
-      - DOMAIN='https://bw.${var_domain}/'
+      - DOMAIN='https://bitwarden.MYDOMAIN.TLD/'
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${appdata_folder}/bitwarden/data:/data:rw
+      - /share/swarm/appdata/bitwarden/data:/data:rw
     networks:
         - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.bitwarden.entrypoints=https"
-        - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.${var_domain}`)"
-        - "traefik.http.routers.bitwarden.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.bitwarden.rule=Host(`bitwarden.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.bitwarden.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.bitwarden.middlewares=forward-auth@file"
         - "traefik.http.services.bitwarden.loadbalancer.server.port=80"
 

@@ -1,20 +1,20 @@
 # Traefik Dynamic Configuration
 # Routers: Static (Non-Docker) Routers
-# Host Path: ${configs_folder}/traefik/dynamic/static-routers.yaml
+# Host Path: /share/swarm/configs/traefik/dynamic/static-routers.yaml
 # Internal Path: /etc/traefik/dynamic/static-routers.yaml
 
 http:
   routers:
-    ${var_nas_name}:
+    mynasname:
       entryPoints:
         - https
       middlewares:
         - forward-auth
-      service: ${var_nas_name}
-      rule: "Host(`${var_nas_name}.${var_domain}`)"
+      service: mynasname
+      rule: "Host(`mynasname.MYDOMAIN.TLD`)"
       tls:
-        certResolver: ${var_certresolver}
+        certResolver: cloudflare
         domains:
-          - main: "*.${var_domain}"
+          - main: "*.MYDOMAIN.TLD"
             sans:
-              - ${var_domain}
+              - MYDOMAIN.TLD

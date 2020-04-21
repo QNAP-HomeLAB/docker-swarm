@@ -1,6 +1,6 @@
 # Traefik Dynamic Configuration
 # Middleware: Secured Chain (Testing)
-# Host Path: ${configs_folder}/traefik/dynamic/secured-chain.yaml
+# Host Path: /share/swarm/appdata/config/traefik/dynamic/secured-chain.yaml
 # Internal Path: /etc/traefik/dynamic/secured-chain.yaml
 
 http:

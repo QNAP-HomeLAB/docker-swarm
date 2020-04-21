@@ -1,5 +1,5 @@
 # Autopirate Recipe
-# ${configs_folder}/autopirate/autopirate.yml
+# /share/swarm/configs/autopirate/autopirate.yml
 version: "3.4"
 
 services:
@@ -7,18 +7,18 @@ services:
     image: jgeusebroek/privatebin
     volumes:
       - /etc/timezone:/etc/timezone:ro
-      - ${appdata_folder}/privatebin/data:/privatebin/data
-      - ${appdata_folder}/privatebin/config:/privatebin/cfg   
+      - /share/swarm/appdata/privatebin/data:/privatebin/data
+      - /share/swarm/appdata/privatebin/config:/privatebin/cfg   
     networks:
       - traefik_public
     deploy:
       labels:
         - "traefik.enable=true"         
         - "traefik.http.routers.paste.entrypoints=https"
-        - "traefik.http.routers.paste.rule=Host(`whoami.${var_domain}`)"
-        - "traefik.http.routers.paste.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.paste.rule=Host(`paste.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.paste.tls.certresolver=MYCERTRESOLVER"
+        - "traefik.http.services.paste.loadbalancer.server.port=80"         
         - "traefik.http.routers.paste.middlewares=forward-auth@file"         
-        - "traefik.http.services.paste.loadbalancer.server.port=${port_privatebin_lb}"
 
 networks:
   traefik_public:

@@ -1,36 +1,36 @@
 # Diskover Recipe
-# ${configs_folder}/diskover/diskover.yml
+# /share/swarm/configs/diskover/diskover.yml
 version: "3.4"
 
 secrets:
-  elasticsearch_pwd:
-    file: "${secrets_folder}/elasticsearch_pwd.secret"
+  es_pass:
+    file: "/share/swarm/secrets/elasticsearch_pwd_elastic.secret"
 
 services:
-  diskover:
+  app:
     image: linuxserver/diskover:latest
     secrets:
-      - elasticsearch_pwd
+      - es_pass
     environment:
-      - PUID=${var_usr}
-      - PGID=${var_grp}
-      - TZ=${var_tz_region}/${var_tz_city}
-      - REDIS_HOST=${var_redis_host}
-      - REDIS_PORT=${port_redis}
-      - ES_HOST=${var_es_host}
-      - ES_PORT=${port_elasticsearch}
-      - ES_USER=${var_es_user}
-      - ES_PASS=/run/secrets/elasticsearch_pwd
+      - PUID=1000
+      - PGID=100
+      - TZ=America/Chicago
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - ES_USER=elastic
+      - ES_PASS=/run/secrets/es_pass
       - RUN_ON_START=true
       - USE_CRON=true
       - INDEX_NAME=diskover-
     volumes:
-      - ${appdata_folder}/diskover/config:/config
+      - /share/swarm/appdata/diskover/config:/config
       - /share:/data
 # Or, you can bind multiple host directories under the /data directory for scanning.
       #- /share/Photos:/data/photos
       #- /share/downloads:/data/downloads
-      #- /share/appdata:/data/appdata
+      #- /share/swarm/appdata:/data/appdata
     networks:
       - internal
       - traefik_public
@@ -41,28 +41,28 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.diskover.entrypoints=https"
-        - "traefik.http.routers.diskover.rule=Host(`diskover.${var_domain}`)"
-        - "traefik.http.routers.diskover.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.diskover.rule=Host(`diskover.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.diskover.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.diskover.middlewares=forward-auth@file"
         - "traefik.http.routers.diskover.service=diskover"
         - "traefik.http.services.diskover.loadbalancer.server.port=80"
         - "traefik.http.routers.diskoverdash.entrypoints=https"
-        - "traefik.http.routers.diskoverdash.rule=Host(`diskoverdash.${var_domain}`)"
-        - "traefik.http.routers.diskoverdash.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.diskoverdash.rule=Host(`diskoverdash.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.diskoverdash.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.diskoverdash.middlewares=forward-auth@file"
         - "traefik.http.routers.diskoverdash.service=diskoverdash"
-        - "traefik.http.services.diskoverdash.loadbalancer.server.port=${port_diskover}"
+        - "traefik.http.services.diskoverdash.loadbalancer.server.port=9181"
         - "traefik.http.routers.diskoversocket.entrypoints=https"
-        - "traefik.http.routers.diskoversocket.rule=Host(`diskoverdash.${var_domain}`)"
-        - "traefik.http.routers.diskoversocket.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.diskoversocket.rule=Host(`diskoversocket.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.diskoversocket.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.diskoversocket.middlewares=forward-auth@file"
         - "traefik.http.routers.diskoversocket.service=diskoversocket"
-        - "traefik.http.services.diskoversocket.loadbalancer.server.port=${port_diskover_lb}"
+        - "traefik.http.services.diskoversocket.loadbalancer.server.port=9999"
 
   elasticsearch:
     image: elasticsearch:5.6-alpine
     volumes:
-      - ${runtime_folder}/diskover/es-data:/usr/share/elasticsearch/data
+      - /share/swarm/runtime/diskover/elasticsearch:/usr/share/elasticsearch/data
     environment:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
@@ -78,7 +78,7 @@ services:
   redis:
     image: redis:alpine
     volumes:
-      - ${runtime_folder}/diskover/redis:/data
+      - /share/swarm/runtime/diskover/redis:/data
     networks:
       - internal
 
@@ -89,4 +89,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_diskover}/24
+        - subnet: 172.16.53.0/24

@@ -1,6 +1,6 @@
 # Traefik Dynamic Configuration
 # TLS Configuration
-# Host Path: ${configs_folder}/traefik/dynamic/tls-options.yaml
+# Host Path: /share/swarm/appdata/config/traefik/dynamic/tls-options.yaml
 # Internal Path: /etc/traefik/dynamic/tls-options.yaml
 
 tls:

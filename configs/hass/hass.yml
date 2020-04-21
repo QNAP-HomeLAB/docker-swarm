@@ -1,5 +1,5 @@
 # Homeassistant Recipe
-# ${configs_folder}/hass/hass.yml
+# /share/swarm/configs/hass/hass.yml
 version: "3.4"
 
 services:
@@ -8,15 +8,15 @@ services:
     networks:
       - internal      
     ports:
-      - ${port_influxdb}:8086
+      - 8086:8086
     volumes:
-      - ${runtime_folder}/hass/influxdb:/var/lib/influxdb
+      - /share/swarm/runtime/hass/influxdb:/var/lib/influxdb
       - /etc/localtime:/etc/localtime:ro
       
   influxdb-backup:
     image: influxdb/influxdb:latest
     volumes:
-      - ${appdata_folder}/hass/influxdb-dump:/dump
+      - /share/swarm/appdata/hass/influxdb-dump:/dump
     entrypoint: |
       bash -c 'bash -s <<EOF
       trap "break;exit" SIGHUP SIGINT SIGTERM
@@ -33,21 +33,21 @@ services:
     networks:
       - internal
 
-  homeassistant:
+  app:
     image: homeassistant/home-assistant:latest
     ports:
-      - ${port_hass}:8123
+      - 8123:8123
     volumes:
-      - ${appdata_folder}/hass/config:/config
+      - /share/swarm/appdata/hass/config:/config
       - /etc/localtime:/etc/localtime:ro
     deploy:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.hass.entrypoints=https"
-        - "traefik.http.routers.hass.rule=Host(`homeassistant.${var_domain}`) || (Host(`hass.${var_domain}`))"
-        - "traefik.http.routers.hass.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.hass.rule=Host(`homeassistant.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.hass.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.hass.middlewares=basic-user@file"
-        - "traefik.http.services.hass.loadbalancer.server.port=${port_hass}"
+        - "traefik.http.services.hass.loadbalancer.server.port=8123"    
     networks:
       - traefik_public
       - internal    
@@ -55,7 +55,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     volumes:
-      - ${appdata_folder}/hass/grafana:/var/lib/grafana
+      - /share/swarm/appdata/hass/grafana:/var/lib/grafana
       - /etc/localtime:/etc/localtime:ro
     networks:
       - internal
@@ -64,10 +64,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.hass-grafana.entrypoints=https"
-        - "traefik.http.routers.hass-grafana.rule=Host(`hass-grafana.${var_domain}`)"
-        - "traefik.http.routers.hass-grafana.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.hass-grafana.rule=Host(`hass-grafana.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.hass-grafana.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.hass-grafana.middlewares=basic-user@file"
-        - "traefik.http.services.hass-grafana.loadbalancer.server.port=${port_grafana}"    
+        - "traefik.http.services.hass-grafana.loadbalancer.server.port=3000"    
 
 networks:
   traefik_public:
@@ -76,4 +76,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_hass}/24
+        - subnet: 172.16.14.0/24

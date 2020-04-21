@@ -1,40 +1,41 @@
 # Traefik 2.0 Recipe
-# ${configs_folder}traefik/traefik.yml
+z# /share/swarm/configs/traefik/traefik.yml
 version: "3.4"
 
 secrets:
+  cloudflare_api_email:
+    file: "/share/swarm/secrets/cloudflare_api_email.secret"
   cloudflare_api_key:
-    file: "${secrets_folder}/cloudflare_api_key.secret"
-
+    file: "/share/swarm/secrets/cloudflare_api_key.secret"
+  
 services:
   app:
     image: traefik:latest
     secrets:
+      - cloudflare_api_email
       - cloudflare_api_key
     environment:
-      - CF_API_EMAIL=${var_cf_api_email}
-      - CF_API_KEY_FILE=/run/secrets/cloudflare_api_key
-      #- CF_API_KEY=/run/secrets/cloudflare_api_key
+      - CLOUDFLARE_API_EMAIL_FILE=/run/secrets/cloudflare_api_email
+      - CLOUDFLARE_API_KEY_FILE=/run/secrets/cloudflare_api_key
     ports:
       - target: 80
-        published: ${port_traefik_http}
+        published: 80
         protocol: tcp
         mode: host
       - target: 443
-        published: ${port_traefik_https}
+        published: 443
         protocol: tcp
         mode: host
       - target: 8080
-        published: ${port_traefik}
+        published: 8090
         protocol: tcp
         mode: host
     volumes:
        - /etc/timezone:/etc/timezone:ro
        - /var/run/docker.sock:/var/run/docker.sock:ro
-       - ${appdata_folder}/traefik:/etc/traefik
+       - /share/swarm/appdata/traefik:/etc/traefik
     networks:
       - traefik_public
-    restart: always
     command: --configFile=/etc/traefik/traefik-static.yaml
     deploy:
       placement:
@@ -42,10 +43,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.traefik.entrypoints=https"
-        - "traefik.http.routers.traefik.rule=Host(`traefik.${var_domain}`) || (Host(`${var_domain}`) && Path(`/traefik`))"
-        - "traefik.http.routers.traefik.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.traefik.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.traefik.middlewares=forward-auth@file"
-        - "traefik.http.services.traefik.loadbalancer.server.port=${port_traefik}"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
   whoami:
     image: containous/whoami
@@ -55,10 +56,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.whoami.entrypoints=https"
-        - "traefik.http.routers.whoami.rule=Host(`whoami.${var_domain}`)"
-        - "traefik.http.routers.whoami.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.whoami.rule=Host(`whoami.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.whoami.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.whoami.middlewares=forward-auth@file"
-        - "traefik.http.services.whoami.loadbalancer.server.port=${port_whoami}"
+        - "traefik.http.services.whoami.loadbalancer.server.port=80"
 
   auth:
     image: dniel/forwardauth:latest
@@ -66,11 +67,11 @@ services:
       - traefik_public
     ports:
       - target: 8080
-        published: ${port_forwardauth_lb}
+        published: 8080
         protocol: tcp
         mode: host
     volumes:
-      - ${configs_folder}/traefik/application.yaml:/configs/application.yaml
+      - /share/swarm/configs/traefik/application.yaml:/config/application.yaml
     deploy:
       resources:
         limits:
@@ -80,10 +81,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.auth.entrypoints=https"
-        - "traefik.http.routers.auth.rule=Host(`auth.${var_domain}`)"
-        - "traefik.http.routers.auth.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.auth.rule=Host(`auth.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.auth.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.auth.middlewares=forward-auth@file"
-        - "traefik.http.services.auth.loadbalancer.server.port=${port_forwardauth_lb}"
+        - "traefik.http.services.auth.loadbalancer.server.port=8080"
 
   www:
     image: dniel/blogr-www
@@ -93,10 +94,10 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.www.entrypoints=https"
-        - "traefik.http.routers.www.rule=Host(`www.${var_domain}`)"
-        - "traefik.http.routers.www.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.www.rule=Host(`www.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.www.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.www.middlewares=forward-auth@file"
-        - "traefik.http.services.www.loadbalancer.server.port=${port_blogr_lb}"
+        - "traefik.http.services.www.loadbalancer.server.port=80"
 
 networks:
   traefik_public:

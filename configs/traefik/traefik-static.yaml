@@ -1,5 +1,5 @@
 # Traefik Static Configuration
-# Host Path: ${configs_folder}/traefik/traefik-static.yaml
+# Host Path: /share/swarm/configs/traefik/traefik-static.yaml
 # Internal Path: /etc/traefik/traefik-static.yaml
 
 global:
@@ -17,9 +17,9 @@ entryPoints:
       - "172.16.0.0/12"
       - "10.0.0.0/8"
       - "192.168.0.0/16"
+      - "192.168.186.0/16"
       - "192.168.100.0/16"
       - "192.168.200.0/16"
-      - "192.168.186.0/16"
 
   https:
     address: ":443"
@@ -28,10 +28,10 @@ entryPoints:
       trustedIPs:
       - "172.16.0.0/12"
       - "10.0.0.0/8"
+      # Enter your Local Area Network IP schema here
       - "192.168.0.0/16"
       - "192.168.100.0/16"
       - "192.168.200.0/16"
-      - "192.168.186.0/16"
 
 providers:
   docker:
@@ -81,13 +81,13 @@ accessLog:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: "${var_email}"
+      email: "myusername@my.email"
       storage: "/etc/traefik/acme.json"
       # Alternative ACME Staging CA Server (not ratelimited like prod): 
       # caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
       dnsChallenge:
-        provider: ${var_dns_provider}
+        provider: cloudflare
         delayBeforeCheck: 0
         resolvers:
-        - "${var_dns1}"
-        - "${var_dns2}"
+        - "1.1.1.1:53"
+        - "8.8.8.8:53"

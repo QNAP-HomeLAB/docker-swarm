@@ -1,36 +1,44 @@
 # Nextcloud Recipe
-# ${configs_folder}/nextcloud/nextcloud.yml
+# /share/swarm/configs/nextcloud/nextcloud.yml
 version: "3.4"
 
 secrets:
-  nextcloud_admin_pwd:
-    file: "${secrets_folder}/nextcloud_admin_pwd.secret"
-  nextcloud_mysql_pwd:
-    file: "${secrets_folder}/nextcloud_mysql_pwd.secret"
-  
+  nextcloud_admin_user:
+    file: "/share/swarm/secrets/nextcloud_admin_user.secret"
+  nextcloud_admin_pass:
+    file: "/share/swarm/secrets/nextcloud_admin_pass.secret"
+  nextcloud_db_user:
+    file: "/share/swarm/secrets/nextcloud_db_user.secret"
+  nextcloud_db_pass:
+    file: "/share/swarm/secrets/nextcloud_db_pass.secret"
+  nextcloud_db_root:
+    file: "/share/swarm/secrets/nextcloud_db_root.secret"
+
 services:
-  nextcloud:
+  app:
     image: nextcloud:latest
     secrets:
-      - nextcloud_admin_pwd
-      - nextcloud_mysql_pwd
+      - nextcloud_admin_user
+      - nextcloud_admin_pass
+      - nextcloud_db_user
+      - nextcloud_db_pass
     environment:
-      - NEXTCLOUD_ADMIN_USER=${var_nextcloud_admin_usr}
-      - NEXTCLOUD_ADMIN_PASSWORD=/run/secrets/nextcloud_admin_pwd
-      - NEXTCLOUD_TRUSTED_DOMAINS=${var_domain}
-      - MYSQL_HOST=${var_nextcloud_mysql_host}
-      - MYSQL_DATABASE=${var_nextcloud_db}
-      - MYSQL_USER=${var_nextcloud_mysql_usr}
-      - MYSQL_PASSWORD=/run/secrets/nextcloud_mysql_pwd
-      - REDIS_HOST=${var_nextcloud_redis_host}
-      - REDIS_HOST_PORT:${port_redis}
+      - NEXTCLOUD_ADMIN_USER=/run/secrets/nextcloud_admin_user
+      - NEXTCLOUD_ADMIN_PASSWORD=/run/secrets/nextcloud_admin_pass
+      - NEXTCLOUD_TRUSTED_DOMAINS=MYDOMAIN.TLD
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=/run/secrets/nextcloud_db_user
+      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_pass
+      - REDIS_HOST=redis
+      - REDIS_HOST_PORT:6379    
     ports:
-      - ${port_nextcloud}:80
+      - 11245:80
     volumes:
-      - ${appdata_folder}/nextcloud:/var/www/html
-      - ${appdata_folder}/nextcloud/apps:/var/www/html/custom_apps
-      - ${appdata_folder}/nextcloud/config:/var/www/html/config
-      - ${appdata_folder}/nextcloud/data:/var/www/html/data 
+      - /share/swarm/appdata/nextcloud:/var/www/html
+      - /share/swarm/appdata/nextcloud/apps:/var/www/html/custom_apps
+      - /share/swarm/appdata/nextcloud/config:/var/www/html/config
+      - /share/swarm/appdata/nextcloud/data:/var/www/html/data 
     networks:
       - internal
       - traefik_public
@@ -38,9 +46,9 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.nextcloud.entrypoints=https"
-        - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.${var_domain}`)"
-        - "traefik.http.routers.nextcloud.tls.certresolver=${var_certresolver}"
-        - "traefik.http.services.nextcloud.loadbalancer.server.port=${port_nextcloud_lb}"     
+        - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.nextcloud.tls.certresolver=MYCERTRESOLVER"
+        - "traefik.http.services.nextcloud.loadbalancer.server.port=80"     
 
   adminer: 
     image: adminer:latest
@@ -51,34 +59,42 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.nextadmin.entrypoints=https"
-        - "traefik.http.routers.nextadmin.rule=Host(`nextadmin.${var_domain}`)"
-        - "traefik.http.routers.nextadmin.tls.certresolver=${var_certresolver}"
+        - "traefik.http.routers.nextadmin.rule=Host(`nextadmin.MYDOMAIN.TLD`)"
+        - "traefik.http.routers.nextadmin.tls.certresolver=MYCERTRESOLVER"
         - "traefik.http.routers.nextadmin.middlewares=basic-auth@file"
-        - "traefik.http.services.nextadmin.loadbalancer.server.port=${port_adminer_lb}"    
+        - "traefik.http.services.nextadmin.loadbalancer.server.port=8080"    
 
   db:
     image: mariadb:10
+    secrets:
+      - nextcloud_db_user
+      - nextcloud_db_pass
+      - nextcloud_db_root
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_ROOT_PASSWORD=/run/secrets/nextcloud_mysql_pwd
-      - MYSQL_DATABASE=${var_nextcloud_db}
-      - MYSQL_USER=${var_nextcloud_mysql_usr}
-      - MYSQL_PASSWORD=/run/secrets/nextcloud_mysql_pwd
+      - MYSQL_ROOT_PASSWORD=/run/secrets/nextcloud_db_root
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=/run/secrets/nextcloud_db_user
+      - MYSQL_PASSWORD=/run/secrets/nextcloud_db_pass   
     volumes:
-      - ${runtime_folder}/nextcloud/db:/var/lib/mysql
+      - /share/swarm/runtime/nextcloud/db:/var/lib/mysql
     networks:
       - internal  
 
   db-backup:
     image: mariadb:10
+    secrets:
+      - nextcloud_db_user
+      - nextcloud_db_pass
+      - nextcloud_db_root
     environment:
       # For database backup (keep 7 days daily backups)
-      - MYSQL_PWD=/run/secrets/nextcloud_mysql_pwd
-      - MYSQL_USER=${var_nextcloud_mysql_user}
+      - MYSQL_PWD=/run/secrets/nextcloud_db_root
+      - MYSQL_USER=/run/secrets/nextcloud_db_user
       - BACKUP_NUM_KEEP=7
       - BACKUP_FREQUENCY=1d
     volumes:
-      - ${appdata_folder}/nextcloud/database-dump:/dump
+      - /share/swarm/appdata/nextcloud/database-dump:/dump
       - /etc/localtime:/etc/localtime:ro
     entrypoint: |
       bash -c 'bash -s <<EOF
@@ -96,14 +112,14 @@ services:
   redis:
     image: redis:alpine
     volumes:
-      - ${runtime_folder}/nextcloud/redis:/data
+      - /share/swarm/runtime/nextcloud/redis:/data
     networks:
       - internal   
 
   solr:
     image: solr:6-alpine   
     volumes:
-      - ${runtime_folder}/nextcloud/solr:/opt/solr/server/solr/mycores
+      - /share/swarm/runtime/nextcloud/solr:/opt/solr/server/solr/mycores
     entrypoint:
       - docker-entrypoint.sh
       - solr-precreate
@@ -114,7 +130,7 @@ services:
   cron:
     image: nextcloud:latest     
     volumes:
-      - ${appdata_folder}/nextcloud:/var/www/html
+      - /share/swarm/appdata/nextcloud:/var/www/html
     user: www-data
     entrypoint: |
       bash -c 'bash -s <<EOF
@@ -137,4 +153,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_nextcloud}/24
+        - subnet: 172.16.12.0/24

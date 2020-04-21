@@ -1,45 +1,43 @@
 # Graylog Recipe
-# ${configs_folder}/graylog/graylog.yml
+# /share/swarm/configs/graylog/graylog.yml
 version: "3.4"
 
 secrets:
-  graylog_root_password:
-    #Must be at least 16 characters!
-    file: "${secrets_folder}/graylog_root_password.secret"
-  graylog_root_password_sha2:
-    #Make next field the SHA2 HASH of the password in the previous line above:
-    file: "${secrets_folder}/graylog_root_password_sha2.secret"
+  graylog_password:
+    file: "/share/swarm/secrets/graylog_password.secret"
+  graylog_password_sha2:
+    file: "/share/swarm/secrets/graylog_password_sha2.secret"
   
 services:
-  graylog:
+  app:
     image: graylog/graylog:3.1
-#    env_file: ${configs_folder}/graylog/graylog.env
     secrets:
-      - graylog_root_password
-      - graylog_root_password_sha2
+      - graylog_password
+      - graylog_password_sha2
+    volumes:
+# chown both folders below to PID 1100 and GID 100 or you get an error that graylog can't chown the folder to work properly
+      - /share/swarm/appdata/graylog/journal:/usr/share/graylog/data/journal
+      - /share/swarm/appdata/graylog/config:/etc/graylog/server
     environment:
-      - GRAYLOG_PASSWORD_SECRET=/run/secrets/graylog_root_password
-      - GRAYLOG_ROOT_PASSWORD_SHA2=/run/secrets/graylog_root_password_sha2
-      - GRAYLOG_WEB_ENDPOINT_URI=https://graylog.${var_domain}
-      - GRAYLOG_REST_ENDPOINT_URI=https://graylog.${var_domain}/api
+      #CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=/run/secrets/graylog_password
+      #Make next field the SHA2 HASH of the password in the previous line above:
+      - GRAYLOG_ROOT_PASSWORD_SHA2=/run/secrets/graylog_password_sha2
+      - GRAYLOG_WEB_ENDPOINT_URI=https://graylog.MYDOMAIN.TLD
+      - GRAYLOG_REST_ENDPOINT_URI=https://graylog.MYDOMAIN.TLD/api
       - GRAYLOG_MONGODB_URI=mongodb://mongo/graylog
-      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:${port_elasticsearch}
-      - GRAYLOG_HTTP_EXTERNAL_URI=https://graylog.${var_domain}/
-      - ROOT_TIMEZONE=${var_tz_region}/${var_tz_city}
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - GRAYLOG_HTTP_EXTERNAL_URI=https://graylog.MYDOMAIN.TLD/
+      - ROOT_TIMEZONE=America/Chicago
       - XPACK.SECURITY.ENABLED=false
       - "ES_JAVA_OPTS=-Xms512m -Xmcx512m"
-    # chown both volume folders below to PID 1100 and GID 100 or you get an error that graylog can't chown the folder to work properly
-    #entrypoint: |
-      #chown -R $var_usr:$var_grp ${appdata_folder}/graylog/
-    volumes:
-      - ${appdata_folder}/graylog/journal:/usr/share/graylog/data/journal
-      - ${appdata_folder}/graylog/config:/etc/graylog/server
+    #env_file: /share/swarm/configs/graylog/graylog.env
     networks:
       - internal
       - traefik_public
     ports:
-      # Graylog web interface and REST API
-      - ${port_graylog}:9000
+      # Graylog web interface and REST API, 9000 conflicts with Portainer default
+      - 9000:9000
       # Syslog TCP
       - 1514:1514
       # Syslog UDP
@@ -56,32 +54,32 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.graylog.entrypoints=https"
-        - "traefik.http.routers.graylog.rule=Host(`graylog.${var_domain}`)"
+        - "traefik.http.routers.graylog.rule=Host(`graylog.MYDOMAIN.TLD`)"
         - "traefik.http.routers.graylog.middlewares=forward-auth@file"
-        - "traefik.http.routers.graylog.tls.certresolver=${var_certresolver}"
-        - "traefik.http.services.graylog.loadbalancer.server.Port=${port_graylog}"  
+        - "traefik.http.routers.graylog.tls.certresolver=MYCERTRESOLVER"
+        - "traefik.http.services.graylog.loadbalancer.server.Port=9000"  
 # only necessary if your docker host DNS suffix points to a domain with a wildcard A record (graylog tries to lookup "elasticsearch.<yourdomain>", instead of using docker service discovery)
-    dns_search: ${var_domain}
+    dns_search: MYDOMAIN.TLD
     
-  mongo:
+  mongodb:
     image: mongo:4.0
     volumes:
-      - ${runtime_folder}/graylog/db:/data/db
+      - /share/swarm/runtime/graylog/db:/data/db
     networks:
       - internal
 
-  elasticsearch:
+# forElastic search to work properly, use this command in CLI: "sysctl -w vm.max_map_count=262144"
+  es:
     image: elasticsearch:6.8.3
     ports:
-      - ${port_elasticsearch}:9200
+      - 9200:9200
     # Elasticsearch needs the below command run via CLI to properly.
     #entrypoint: |
       #sysctl -w vm.max_map_count=262144
     volumes:
-      - ${runtime_folder}/graylog/es_data:/usr/share/elasticsearch/data
+      - /share/swarm/runtime/graylog/es_data:/usr/share/elasticsearch/data
     networks:
       - internal
-    #env_file: ${configs_folder}/graylog/graylog.env
     environment:
       - HTTP.HOST=0.0.0.0
       - NETWORK.HOST=0.0.0.0
@@ -89,6 +87,7 @@ services:
       # These will be inherited from the Graylog settings above.
       #- XPACK.SECURITY.ENABLED=false
       #- "ES_JAVA_OPTS=-Xms512m -Xmcx512m"
+    #env_file: /share/swarm/configs/graylog/graylog.env
     deploy:
       resources:
         limits:
@@ -105,4 +104,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_graylog}/24
+        - subnet: 172.16.58.0/24

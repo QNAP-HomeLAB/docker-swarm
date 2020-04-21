@@ -1,9 +1,9 @@
 # docker-cleanup Recipe
-# ${configs_folder}/docker-cleanup/docker-cleanup.yml
+# /share/swarm/configs/docker-cleanup/docker-cleanup.yml
 version: "3.4"
 
 services:
-  docker-cleanup:
+  app:
     image: meltwater/docker-cleanup:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -18,4 +18,4 @@ networks:
     driver: overlay
     ipam:
       config:
-        - subnet: ${ip_docker_cleanup}/24
+        - subnet: 172.16.0.0/24
