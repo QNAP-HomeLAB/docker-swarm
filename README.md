@@ -128,7 +128,7 @@ dsu(){
 }
 # docker_stack_folders -- creates the folder structure required for each listed stack name (up to 9 per command)
 dsf(){
-  bash /share/swarm/scripts/docker_folder_setup.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" 
+  bash /share/swarm/scripts/docker_stack_folders.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" 
 }
 # docker_stack_remove -- removes a single stack
 dsr(){
