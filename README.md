@@ -62,7 +62,7 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
 7. Create the following folder shares *using the QTS web-GUI* at `ControlPanel >> Privilege >> Shared Folders` and give _dockeruser_ Read/Write permissions:
   - `/share/swarm/appdata`
     - Here we will add folders named `< stack name >`. This is where your application files live... libraries, artifacts, internal application configuration, etc. Think of this directory much like a combination of `C:\Windows\Program Files` and `C:\Users\<UserName>\AppData` in Windows.
-  - `/share/swarm/config`
+  - `/share/swarm/configs`
     - Here we will also add folders named `< stack name >`. Inside this structure, we will keep our actual _stack_name.yml_ files and any other necessary config files used to configure the docker stacks and images we want to run. This folder makes an excellent GitHub repository for this reason.
   - `/share/swarm/runtime`
     - This is a shared folder on a volume that does not get backed up. It is where living DB files and transcode files reside, so it would appreciate running on the fastest storage group you have or in cache mode or in Qtier (if you use it). Think of this like the `C:\Temp\` in Windows.
