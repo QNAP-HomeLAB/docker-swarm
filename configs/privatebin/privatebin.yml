@@ -6,7 +6,7 @@ services:
   app:
     image: jgeusebroek/privatebin
     volumes:
-      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/timezone:ro
       - ${appdata_folder}/privatebin/data:/privatebin/data
       - ${appdata_folder}/privatebin/config:/privatebin/cfg   
     networks:

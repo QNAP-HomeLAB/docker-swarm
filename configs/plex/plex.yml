@@ -28,7 +28,7 @@ services:
     networks:
       - traefik_public        
     volumes:
-      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/timezone:ro
       - ${appdata_folder}/plex:/config
       - ${media_videos_folder}:/data
       - ${runtime_folder}/plex/transcode:/transcode
