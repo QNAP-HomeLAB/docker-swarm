@@ -1,0 +1,41 @@
+# Netdata config file
+# /share/swarm/configs/netdata/netdata.yml
+
+version: '3.4'
+
+services:
+  app:
+    image: netdata/netdata
+    hostname: netdata.domain.xyz # set to fqdn of host
+    environment:
+      - PGID=0
+      - TZ=Europe/Amsterdam
+#        - VIRTUALIZATION=${VIRTUALIZATION}
+    ports:
+      - 19999:19999
+#    cap_add:
+#      - SYS_PTRACE
+#    security_opt:
+#      - apparmor:unconfined
+    volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /var/lib/docker/volumes:/usr/bin/docker:rw
+    networks:
+      - traefik_public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.netdata.entrypoints=https"
+        - "traefik.http.routers.netdata.rule=Host(`netdata.domain.xyz`)"
+        - "traefik.http.routers.netdata.service=netdata"
+        - "traefik.http.routers.netdata.tls.certresolver=cloudflare"
+        - "traefik.http.routers.netdata.middlewares=forward-auth@file"
+        - "traefik.http.services.netdata.loadbalancer.server.port=19999"
+networks:
+  traefik_public:
+    external: true
