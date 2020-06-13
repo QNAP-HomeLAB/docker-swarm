@@ -98,7 +98,7 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
   - Add the following lines to the end of the file and save.
     - ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
 
-```
+```bash
 # docker_commands_list -- lists the below custom docker commands
 dlist(){
   bash /share/swarm/scripts/docker_commands_list.sh
@@ -110,6 +110,10 @@ dcd(){
 # docker_compose_up -- starts the entered container using preconfigured docker_compose files
 dcu(){
   bash /share/swarm/scripts/docker_compose_up.sh "$1" 
+}
+# docker_compose_logs -- displays 50 log entries for the indicated docker-compose container
+dcl(){
+  bash /share/swarm/scripts/docker_compose_logs.sh "$1" 
 }
 # docker_stack_bounce -- removes then (re)deployes the listed stacks or '-all' stacks with config files in the folder structure
 dsb(){
@@ -161,11 +165,21 @@ dwinit(){
 
 - Remember these shortcut names, (defined by the above shortcuts which point to required scripts, listed below):
 
+  - In general, this is the scheme for how the shortcut acronyms are composed:
+    - `dc...` refers to `Docker Compose` commands, for use outside of a swarm setup
+    - `dl...` refers to `Docker List` commands (i.e. docker processes, docker networks, etc)
+    - `ds...` refers to `Docker Stack` commands (groupls of containers in a swarm setup)
+    - `dv...` refers to `Docker serVice` commands (mostly error and logs related)
+    - `dw...` refers to `Docker sWarm` initialization/removal commands (the whole swarm)
+  
   - `dlist` -- docker_commands_list - lists the custom Docker Swarm commands created for managing a QNAP Docker Swarm"
+
   - `dcd` -- docker_compose_dn - stops (brings 'down') a docker-compose container
       - **SYNTAX:** `dcd traefik`
   - `dcu` -- docker_compose_up - starts (brings 'up') a docker-compose container
       - **SYNTAX:** `dcu traefik`
+  - `dcl` -- docker_compose_logs -- displays 50 log entries for the indicated docker-compose container
+      - **SYNTAX:** `dcl traefik`
 
   - `dsb` -- docker_stack_bounce - removes a single stack then recreates it using $config_folder/stackname/stackname.yml
       - **SYNTAX:** `dsb privatebin`
