@@ -22,9 +22,9 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
   - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - **Ports 80 and 443 must be forwarded from your router to your NAS**. This is *possible* using UPNP in the QNAP GUI, but ***is not recommended!***
   - **Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
-  - ***NOTE:*** There are too many possible routers to cover how to forward ports on each, but there are some good guides here if you don't know how to do it for your router: (https://portforward.com/router.htm) or (https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/)
+  - ***NOTE***: There are too many possible routers to cover how to forward ports on each, but there are some good guides here if you don't know how to do it for your router: (https://portforward.com/router.htm) or (https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/)
 
-**In sum:**
+**Ports Overview**:
 - QTS System ports should be:
   - HTTP : 8880
   - HTTPS: 8443
@@ -97,7 +97,7 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
     - ***NOTE:*** **You MUST set the end of line format to UNIX (LF) in order for the profile and scripts to work correctly.**
   
   - Add the following lines to the end of the file and save.
-    - ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
+    - ***NOTE***: You will need to restart your ssh or cli session in order to make the profile changes effective.
 
 ```bash
 # docker_commands_list -- lists the below custom docker commands
