@@ -27,25 +27,30 @@ helpFunction(){
     helpFunction
   else
     # Query if all stacks should be removed before leaving swarm
-    read -r -p "Do you want to remove all Docker Swarm stacks (it is highly recommended)? [Yes/No] " input
+    read -r -p "Do you want to remove all Docker Swarm stacks (highly recommended)? [(Y)es/(N)o] " input
     echo
   fi
 
 # Remove stacks if input is Yes
   case $input in
     [yY][eE][sS]|[yY])
-      # remove all services in docker swarm
-      . ${scripts_folder}/docker_stack_remove.sh -all
+      # Query if all stacks should be removed before leaving swarm
+      read -r -p "Are you certain you want all Docker Swarm stacks removed? [(Y)es/(N)o] " confirm
+      case $confirm in 
+        [yY][eE][sS]|[yY])
+        # remove all services in docker swarm
+        . ${scripts_folder}/docker_stack_remove.sh -all
+        ;;
+        *)
+        exit 1
+      esac
       ;;
     [nN][oO]|[nN])
       echo "** DOCKER SWARM STACKS WILL NOT BE REMOVED **";
       # Pruning the system is optional but recommended
         . ${scripts_folder}/docker_system_prune.sh -f
       ;;
-    *)
-      echo "** INVALID INPUT: Must be any case-insensitive variation of 'yes' or 'no'.";
-      exit 1
-      ;;
+    *) echo "INVALID INPUT: Must be any case-insensitive variation of 'yes' or 'no'." break ;;
   esac
 
 # Leave the swarm

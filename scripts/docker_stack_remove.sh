@@ -82,8 +82,7 @@ helpFunction(){
   for stack in "${remove_list[@]}"; do
     echo "**** REMOVING '$stack' ****"
     docker stack rm "$stack"
-    # The below line is needed only if '.env' file redirect is used
-    #rm -f $configs_folder/${stack}/.env
+    rm -f ${configs_folder}/${stack}/.env
     echo "*** '$stack' REMOVED, WAITING 10 SECONDS ***"
     sleep 10
   done
