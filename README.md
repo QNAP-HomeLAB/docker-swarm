@@ -604,31 +604,6 @@ helpFunction(){
   echo "*** DEPLOYING LISTED STACK(S) ***"
   # Remove duplicate entries in deploy_list
     deploy_list=(`for stack in "${deploy_list[@]}" ; do echo "$stack" ; done | sort -u`)
-  # Remove 'traefik' from the deploy_list array
-    for i in "${!deploy_list[@]}"; do
-      if [[ "${deploy_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
-        unset 'deploy_list[i]'
-      fi
-    done
-  # Add 'traefik' stack as first item in deploy_list array
-    if [ "$(docker service ls --filter name=traefik -q)" = "" ]; then
-      deploy_list=( "traefik" "${deploy_list[@]}" )
-      echo " -> ${deploy_list[@]}"
-      echo
-      echo "*** TRAEFIK MUST BE THE FIRST DEPLOYED SWARM STACK ***"
-      echo
-    else
-      echo " -> ${deploy_list[@]}"
-      echo
-    fi
-  # Create the 'traefik_public' overlay network if it does not already exist
-    if [ "$(docker network ls --filter name=traefik -q)" = "" ]; then
-      echo "*** CREATING OVERLAY NETWORK ***"
-      docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public
-      echo "***** OVERLAY NETWORK CREATED, WAITING 15 SECONDS *****"
-      sleep 15
-      echo
-    fi
 
 # Deploy indicated stack(s)
   for stack in "${deploy_list[@]}"; do
