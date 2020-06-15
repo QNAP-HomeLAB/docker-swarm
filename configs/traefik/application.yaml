@@ -12,6 +12,8 @@
 domain: https://${var_auth0_tenant}.auth0.com/
 token-endpoint: https://${var_auth0_tenant}.auth0.com/oauth/token
 authorize-url: https://${var_auth0_tenant}.auth0.com/authorize
+userinfo-endpoint: https://${var_auth0_tenant}.auth0.com/userinfo
+logout-endpoint: https://${var_auth0_tenant}.auth0.com/v2/logout
 
 secrets:
   auth0_client_id:
@@ -27,18 +29,18 @@ default:
   name: ${var_domain}
   client-id: /run/secrets/auth0_client_id
   client-secret: /run/secrets/auth0_client_secret
-  audience: https://${var_auth0_tenant}.auth0.com/userinfo
+  audience: https://${var_auth0_tenant}.auth0.com/api/v2/
   scope: "profile openid email"
   redirect-uri: https://auth.${var_domain}/signin
   token-cookie-domain: ${var_domain}
-  restricted-methods:
-  - GET
-  - HEAD
-  - OPTION
-  - DELETE
-  - PUT
-  - PATCH
-  - POST
+  #restricted-methods:
+  #  - GET
+  #  - HEAD
+  #  - OPTION
+  #  - DELETE
+  #  - PUT
+  #  - PATCH
+  #  - POST
   claims:
     - sub
     - name
