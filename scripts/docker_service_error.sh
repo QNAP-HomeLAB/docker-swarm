@@ -3,7 +3,7 @@
 # Help message for script
 helpFunction(){
   echo 
-  echo "This script performs Docker Swarm initial setup tasks on QNAP Container Station architecture."
+  echo "This script lists errors for the indicated 'stackname_appname' (both names are required)."
   echo
   echo "SYNTAX: # dve <servicename>"
   echo "SYNTAX: # dve -option"
