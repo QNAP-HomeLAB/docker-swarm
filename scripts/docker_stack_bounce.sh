@@ -33,6 +33,24 @@ helpFunction(){
     bounce_list=("$@")
   fi
 
+# Remove 'traefik' from the bounce_list array, unless it's the only stack listed
+  if [[ ! ${bounce_list[0]} = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+    for i in "${!bounce_list[@]}"; do
+      if [[ "${bounce_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+        unset 'bounce_list[i]'
+      fi
+    done
+    # Fix null entry remaining from using 'unset' to remove 'traefik' from list
+    i=0
+    for entry in "${bounce_list[@]}"; do
+      fixed_bounce_list[$i]=$entry
+      ((++i))
+    done
+    unset bounce_list IFS
+    bounce_list="${fixed_bounce_list[@]}"
+    unset fixed_bounce_list
+  fi
+
 # Remove all stacks in list defined above
   . ${scripts_folder}/docker_stack_remove.sh "${bounce_list[@]}"
 
