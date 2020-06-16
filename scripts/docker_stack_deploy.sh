@@ -61,8 +61,8 @@ helpFunction(){
       deploy_list=( "traefik" "${deploy_list[@]}" )
       echo " -> ${deploy_list[@]}"
       echo
-      echo "*** TRAEFIK MUST BE THE FIRST DEPLOYED SWARM STACK ***"
-      echo
+#      echo "*** TRAEFIK MUST BE THE FIRST DEPLOYED SWARM STACK ***"
+#      echo
     else
       echo " -> ${deploy_list[@]}"
       echo
