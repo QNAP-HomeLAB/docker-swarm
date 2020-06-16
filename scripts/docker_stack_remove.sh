@@ -50,8 +50,8 @@ helpFunction(){
       remove_list=( "${remove_list[@]}" "traefik" )
       echo " -> ${remove_list[@]}"
       echo
-      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
-      echo
+#      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
+#      echo
     fi
   elif [[ $1 = "traefik" ]]; then
     if [[ "${bounce_list[@]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
