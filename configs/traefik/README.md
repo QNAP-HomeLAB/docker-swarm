@@ -27,7 +27,7 @@ Then, like before, there is dynamic file-based (or docker-based) configurations 
 So everything can be done in env variables now? Including DNS01 validation magic? ... Yep.
 
 What do you get from docker version?
-```
+```yaml
 Client:
  Version:      17.09.1-ce
  API version:  1.32
@@ -53,7 +53,7 @@ Have you messed with Docker Swarm secrets?
 The image (based on the Dockerfile) needs to be able to handle them, so they won't likely work on non-swarm designed images. But Traefik is.
  
 Here is part of my traefik.yml:
-```
+```yaml
 # Traefik 2.0 Recipe
 # /share/swarm/configs/traefik/traefik.yml
 version: "3.4"
@@ -72,7 +72,7 @@ Kinda like a better way to share yml files without the dummy env :slight_smile:
 But not universally available.
 
 Next snippet:
-```
+```yaml
 services:
   app:
     image: traefik:latest
@@ -82,7 +82,7 @@ services:
 Now I define traefik and I have to source the secret again.
 
 Then my next two lines will help it make sense:
-```
+```yaml
     environment:
       - CF_API_EMAIL=${var_email}
       - CF_API_KEY_FILE=/run/secrets/cloudflare_api_key
@@ -93,7 +93,7 @@ but look where it is located... it is fully encrypted, and removed with the stac
 Only the flat file is unencrypted. You can even pass TLS certs as secrets into Traefik 2.0!
 
 Moving on:
-```
+```yaml
     ports:
       - target: 80
         published: 80
@@ -115,7 +115,7 @@ Notice I map `8090:8080` - this will come up later. This is technically only pos
 Which I have disabled for now, but I like to access via SERVER_IP:8090 when traefik isn't doing TLS right.
 
 Next section:
-```
+```yaml
     volumes:
        - /etc/localtime:/etc/timezone:ro
        - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -124,7 +124,7 @@ Next section:
 Nothing too exciting. I will say I had to use the `docker sock` rather than the `tcp: port`.
 
 This is the only command I pass in:
-```
+```yaml
     networks:
       - traefik_public
     command: --configFile=/etc/traefik/traefik-static.yaml
@@ -141,7 +141,7 @@ If you were doing all your configs with .env variables, you wouldn't need it?
 
 Well, it is needed for `traefik-static.yaml`/`.toml` dynamic configuration yaml files, logs, and the critical `acme.json`
 
-```
+```yaml
 deploy:
   placement:
     constraints: [node.role == manager]
@@ -156,7 +156,7 @@ Everything now has a home or namespace path. So no more floating things at the t
 This is what makes yaml work so well and the docker labels.
 
 You guys don't mind code-reviewing as I explain, especially when I say I have no idea why I did that, do you?
-```
+```yaml
 # Traefik Static Configuration
 # Host Path: /share/swarm/configs/traefik/traefik-static.yaml
 # Internal Path: /etc/traefik/traefik-static.yaml
@@ -165,7 +165,7 @@ global:
 checkNewVersion: true
 ```
 Simple so far.
-```
+```yaml
 serversTransport:
 insecureSkipVerify: true
 ```
@@ -176,7 +176,7 @@ ALSO - PAY CLOSE ATTENTION TO CAPITALIZATION IN TRAEFIK 2.0
 Moving along.
 
 Scared to show my ignorance but oh well...
-```
+```yaml
 entryPoints:
   http:
     address: ":80"
@@ -195,7 +195,7 @@ Aah, point of reference - you have to use host mode ports if you're going to do 
 
 If you don't, you'll end up whitelisting all incoming traffic, which passes through swarm and gets source NAT'd to a 10.x.x.x address.
 
-```
+```yaml
   https:
     address: ":443"
     # Trust IPv4 Private Address Space
@@ -208,7 +208,7 @@ If you don't, you'll end up whitelisting all incoming traffic, which passes thro
 You can tell me if my trustedIPs are dangerous.
 
 For discussion:
-```
+```yaml
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
@@ -229,14 +229,14 @@ providers:
     debugLogGeneratedTemplate: true
 ```
 New defaultRule!
-```
+```yaml
     api:
       dashboard: true
       insecure: true
       debug: true
 ```
 insecure is for dev/test only (so says Traefik),
-```
+```yaml
     metrics:
       prometheus:
         buckets:
@@ -249,7 +249,7 @@ insecure is for dev/test only (so says Traefik),
         entryPoint: metrics
 ```
 Super cool - not sure how to use it yet :slight_smile:
-```
+```yaml
     ping:
       entryPoint: ping
 
@@ -263,7 +263,7 @@ Super cool - not sure how to use it yet :slight_smile:
 Same old thing, just cleaner.
 
 Last bit:
-```
+```yaml
 certificatesResolvers:
   cloudflare:
     acme:
@@ -291,7 +291,7 @@ NOTE: In case I forget, `acme.json` has a new format. You need to either pull ne
 All the rest of these files are in `/share/swarm/configs/traefik/dynamic/`
 
 But they could easily be in one file (in fact, this file):
-```
+```yaml
   file:
     # Optional instead of directory:
     # filename: /etc/traefik/traefik-dynamic.yaml
@@ -299,7 +299,7 @@ But they could easily be in one file (in fact, this file):
 
 ##### static-servers.yaml
 First up, we have `static-servers.yaml` (but KEEP IN MIND you decide how to break these up and I may change them for convenience, etc.
-```
+```yaml
 # Traefik Dynamic Configuration
 # Services: Static (Non-Docker) Services
 # Host Path: /share/swarm/configs/traefik/dynamic/static-servers.yaml
@@ -320,7 +320,7 @@ http:
 I have two services so far - noop and MYNASNAME (shout out to my NAS!)
 
 Now a piece I largely believe unnecessary, but demonstrative, is the `static-routers.yml`
-```
+```yaml
 # Traefik Dynamic Configuration
 # Routers: Static (Non-Docker) Routers
 # Host Path: /share/swarm/configs/traefik/dynamic/static-routers.yaml
@@ -397,7 +397,7 @@ After they are there, they use the host rule or SNI rule to decide which cert sa
 
 ##### static-routers.yaml
 So my new file is:
-```
+```yaml
 # Traefik Dynamic Configuration
 # Routers: Static (Non-Docker) Routers
 # Host Path: /share/swarm/configs/traefik/dynamic/static-routers.yaml
@@ -422,7 +422,7 @@ http:
 
 ##### basic-user.yaml
 Next up we have some middlewares. Again these can all be in one file or otherwise.
-```
+```yaml
 # Traefik Dynamic Configuration
 # Middleware: Basic Authentication
 # Host Path: /share/swarm/configs/traefik/dynamic/basic-user.yaml
@@ -439,7 +439,7 @@ Pretty simple?
 
 ##### compress.yaml
 (unused for now):
-```
+```yaml
 # Traefik Dynamic Configuration
 # Middleware: Compression
 # Host Path: /share/swarm/configs/traefik/dynamic/compress.yaml
@@ -452,7 +452,7 @@ http:
 ```
 
 ##### https-redirect.yaml:
-```
+```yaml
 # Traefik Dynamic Configuration
 # Middleware: HTTPS Redirect
 # Host Path: /share/swarm/configs/traefik/dynamic/https-redirect.yaml
@@ -466,7 +466,7 @@ http:
 ```
 
 ##### forward-auth.yaml:
-```
+```yaml
 # Traefik Dynamic Configuration
 # Middleware: Forward Auth
 # Host Path: /share/swarm/configs/traefik/dynamic/forward-auth.yaml
@@ -487,7 +487,7 @@ Yours will be a bit different on the ResponseHeaders. Now some deep confusion...
 
 ##### secured-chain.yaml
 One more middleware (a chain):
-```
+```yaml
 # Traefik Dynamic Configuration
 # Middleware: Secured Chain (Testing)
 # Host Path: /share/swarm/configs/traefik/dynamic/secured-chain.yaml
@@ -505,7 +505,7 @@ Does NOT seem to work. AT ALL. Regardless of the order I specify them in.
 
 ##### global-redirect.yaml
 So for me to get http-> https redirection I need one more file:
-```
+```yaml
 # Traefik Dynamic Configuration
 # Routers: Global HTTP -> HTTPS Redirect
 # Host Path: /share/swarm/configs/traefik/dynamic/globalredirect.yaml
@@ -540,7 +540,7 @@ That goes nowhere (gets short circuited by the redirect).
 But on to docker labels:
 
 traefik_app (in traefik.yml) labels:
-```
+```yaml
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=https"
@@ -565,9 +565,9 @@ Even in the examples in the forums they show an http and https router.
 
 I think they have an issue to fix this, however, somehow. By leaving you on the same router.
 
-So my `plex.yml` looks like this (labels on plex_app):
 ##### plex.yml
-```
+So my `plex.yml` looks like this (labels on plex_app):
+```yaml
   deploy:
     labels:
       - "traefik.enable=true"
@@ -584,7 +584,7 @@ The TROUBLE - is allowing a single service you WANT exposed on http!
 Since I need a rule that excludes it.
 
 Here is my use case:
-```
+```yaml
   synclounge:
     image: starbix/synclounge:latest
     ports:
