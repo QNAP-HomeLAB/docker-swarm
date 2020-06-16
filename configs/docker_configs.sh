@@ -2,7 +2,7 @@
 
 echo "***** Creating Docker 'config' variables *****"
 # define config variables
-echo "techtinker.net" | docker config create var_domain -
+echo "DOMAIN.TLD" | docker config create var_domain -
 echo "cloudflare" | docker config create var_certresolver -
 echo "America" | docker config create var_tz_region -
 echo "Chicago" | docker config create var_tz_city -
