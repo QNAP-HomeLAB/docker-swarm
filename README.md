@@ -115,7 +115,15 @@ dcu(){
 dcl(){
   bash /share/swarm/scripts/docker_compose_logs.sh "$1" 
 }
-# docker_stack_bounce -- removes then (re)deployes the listed stacks or '-all' stacks with config files in the folder structure
+# docker_list_stack -- lists all stacks and number of services inside each stack
+dls(){
+  bash /share/swarm/scripts/docker_list_stack.sh
+}
+# docker_list_network -- lists current docker networks
+dln(){
+  bash /share/swarm/scripts/docker_list_network.sh
+}
+# docker_stack_bounce -- removes then re-deploys the listed stacks or '-all' stacks with config files in the folder structure
 dsb(){
   bash /share/swarm/scripts/docker_stack_bounce.sh "$1" 
 }
@@ -126,8 +134,7 @@ bounce(){
 dsd(){
   bash /share/swarm/scripts/docker_stack_deploy.sh "$1" 
 }
-# docker_stack_up -- starts all containers in the stack (same as 'dsd -all')
-dsu(){
+dsup(){
   bash /share/swarm/scripts/docker_stack_deploy.sh -all
 }
 # docker_stack_folders -- creates the folder structure required for each listed stack name (up to 9 per command)
@@ -138,28 +145,43 @@ dsf(){
 dsr(){
   bash /share/swarm/scripts/docker_stack_remove.sh "$1" 
 }
-# docker_stack_clear -- removes all containers in the stack (same as 'dsr -all')
-dsc(){
+dsclr(){
   bash /share/swarm/scripts/docker_stack_remove.sh -all
+}
+# docker_swarm_initialize -- Performs specific initialization steps for this swarm/stack setup
+  #bash mkdir -pm 766 /share/swarm/{appdata,configs,runtime,scripts,secrets}
+  #bash curl -fsSL https://raw.githubusercontent.com/Drauku/QNAP-Docker-Swarm-Setup/master/scripts/docker_swarm_init.sh > /tmp/docker_swarm_init.sh && . /tmp/docker_swarm_init.sh
+#dwinit(){
+#  bash /share/swarm/scripts/docker_swarm_init.sh "$1"
+#}
+dwup(){
+  bash /share/swarm/scripts/docker_swarm_init.sh traefik
+}
+# docker_swarm_leave -- LEAVES the docker swarm. USE WITH CAUTION!
+dwlv(){
+  bash /share/swarm/scripts/docker_swarm_leave.sh "$1"
+}
+# docker_swarm_remove -- REMOVES all swarm stacks, REMOVES the overlay network, and LEAVES the swarm. USE WITH CAUTION!
+dwrm(){
+  bash /share/swarm/scripts/docker_swarm_leave.sh -all
 }
 # docker_system_prune -- prunes the docker system (removes unused images and containers)
 dprn(){
   bash /share/swarm/scripts/docker_system_prune.sh 
 }
-# docker_swarm_setup -- creates a new swarm and overlay network, then starts all declared stacks if desired
-dwup(){
-  bash /share/swarm/scripts/docker_swarm_setup.sh "$1"
+# docker_service_errors -- displays 'docker ps --no-trunk <servicename>' command output
+dve(){
+  bash /share/swarm/scripts/docker_service_error.sh "$1"
 }
-# docker_swarm_leave -- REMOVES all stack containers, REMOVES the overlay network, and LEAVES the docker swarm. USE WITH CAUTION!
-dwlv(){
-  bash /share/swarm/scripts/docker_swarm_leave.sh "$1"
+dverror(){
+  bash /share/swarm/scripts/docker_service_error.sh "$1"
 }
-# docker_swarm_remove -- REMOVES all stack containers, REMOVES the overlay network, and LEAVES the swarm. USE WITH CAUTION!
-dwrm(){
-  bash /share/swarm/scripts/docker_swarm_leave.sh -all
+# docker_service_logs -- displays 'docker service logs <servicename>' command output
+dvl(){
+  bash /share/swarm/scripts/docker_service_logs.sh "$1"
 }
-dwinit(){
-  bash mkdir -pm 777 /share/swarm/{appdata,configs,runtime,scripts,secrets}
+dvlogs(){
+  bash /share/swarm/scripts/docker_service_logs.sh "$1"
 }
 ```
 
@@ -222,7 +244,7 @@ dwinit(){
 
 5. **TYPE:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
 
-```
+```bash
 [~] # docker network ls
 NETWORK ID          NAME                DRIVER              SCOPE
 XXXXXXXXXXXX        bridge              bridge              local
@@ -239,7 +261,7 @@ XXXXXXXXXXXX        none                null                local
 8. **CHECKPOINT:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
     * The networks should match the following (except the generated NETWORK ID):
 
-```
+```bash
 [~] # docker network ls
 NETWORK ID          NAME                   DRIVER              SCOPE
 XXXXXXXXXXXX        bridge                 bridge              local
@@ -364,7 +386,7 @@ These variable/config files need to be filled in with your information in order 
   * This is the list of _all_ stacks you might deploy in your swarm
       * Add a stack name here each time you add a new stack 
       * the `stacks_default` array only lists your 'core' stacks, do not include all stack names
-```
+```conf
 # List desired services inside the 'stacks' array parentheses (each service name separated by at least a space)
 ## Each listed stack will require a corresponding '/stackname/stackname.yml' folder/file in the 'configs' folder defined below
 ## NOTE: Leave Traefik off the list as it will be started seperately
@@ -412,19 +434,18 @@ stacks_all=(
   syncthing
   wetty
   )
-
 ```
 
 ##### swarm_vars.conf
   * These variables are used in the scripts found in `/share/swarm/scripts/` and `/share/swarm/configs/`
 
-```
+```conf
 # Variables list for Drauku's QNAP Docker Swarm stack scripts.
 # These variables must be filled in with your network, architecture, etc, information.
-
+#
 # Ensure this file name variable exactly references THIS file
   variables_file=swarm_vars.env
-
+#
 # Folder paths for Drauku's folder structure, modified from gkoerk's famously awesome folder structure for stacks
   swarm_folder=/share/swarm
   appdata_folder=${swarm_folder}/appdata
@@ -433,20 +454,20 @@ stacks_all=(
   secrets_folder=${swarm_folder}/secrets
   scripts_folder=${swarm_folder}/scripts
   stacks_folder=${swarm_folder}/stacks
-
+#
 # Internal network and docker system variables
   var_nas_ip=NASLANIP
   var_usr=1000
   var_grp=100
   var_tz_region=America
   var_tz_city=Chicago
-
+#
 # Domain and user information variables
   var_nas_name=NASNAME #THIS MIGHT NOT WORK FOR CREATING A 'SERVICE' NAME USING Traefik
   var_domain=PERSONALDOMAIN.TLD
   var_email=PERSONAL@EMAIL.ADDRESS
   var_target_email=EMAIL.ADDRESS@FOR.LOGS
-
+#
 # External network resolution and access variables
   var_certresolver=cloudflare
   # If your 'certresolver' and 'dns' services are through cloudflare, fill in the below variables:
@@ -454,19 +475,17 @@ stacks_all=(
   #var_cf_api=<secret>
   # If your 'certresolver' and 'dns' services are through namecheap, fill in the below variables:
   var_namecheap_email=NAMECHEAP@EMAIL.ADDRESS
-
+#
 # Database names, usernames, etc
   var_mongo_db_usr=dockmongo
   #var_mongo_db_pwd=<secret>
   var_mysql_db_usr=dockmysql
   #var_mysql_db_pwd=<secret>
-
+#
 # The below variables are service specific, and can be modified directly in the 'service.yaml' config files.
 # I find it easier to maintain them in one location.
-
+#
 # SERVICENAME specific config variables
-
-
 ```
 ---------------------------------------
 
@@ -480,7 +499,7 @@ All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to ma
 
 ##### docker_compose_dn (dcd)
   * stops the entered container
-```
+```bash
 #!/bin/bash
 # This script STOPS (bring 'down') a single Docker container using a pre-written compose file.
 
@@ -493,7 +512,7 @@ docker-compose -f ${configs_folder}/"$1"/"$1".yml down
 
 ##### docker_compose_up (dcu)
   * starts the entered container using preconfigured docker_compose files
-```
+```bash
 #!/bin/bash
 # This script STARTS (bring 'up') a single Docker container using a pre-written compose file.
 
@@ -506,7 +525,7 @@ docker-compose -f ${configs_folder}/"$1"/"$1".yml up -d
 
 ##### docker_stack_bounce (dsb)
   * removes then (re)deployes the listed stacks or '-all' stacks with config files in the folder structure
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -557,7 +576,7 @@ helpFunction(){
 
 ##### docker_stack_deploy (dsd)
   * deploys a single stack as defind in the configs folder structure
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -649,7 +668,7 @@ helpFunction(){
 
 ##### docker_stack_folders (dsf)
   * creates the folder structure required for each listed stack name (up to 9 per command)
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -702,7 +721,7 @@ helpFunction(){
 
 ##### docker_stack_list (dsl)
   * lists all current swarm stacks and the number of services in each stack
-```
+```bash
 #!/bin/bash
 
 # Listing the currently active docker stacks and number of services per stack
@@ -713,7 +732,7 @@ helpFunction(){
 
 ##### docker_stack_remove (dsr)
   * removes a single stack
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -814,7 +833,7 @@ helpFunction(){
 ##### docker_swarm_leave (dwlv)
   * LEAVES the docker swarm. USE WITH CAUTION!
       * Will also remove all stacks unless you specify the '-noremove' command option
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -872,7 +891,7 @@ helpFunction(){
 
 ##### docker_swarm_setup (dwup)
   * creates a new swarm and overlay network, then starts all declared stacks if desired
-```
+```bash
 #!/bin/bash
 
 # Help message for script
@@ -950,7 +969,7 @@ helpFunction(){
 
 ##### docker_system_prune (dprn)
   * prunes the docker system (removes unused images and containers)
-```
+```bash
 #!/bin/bash
 
 # Perform prune operation with/without '-f' option
