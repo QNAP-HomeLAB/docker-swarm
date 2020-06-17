@@ -8,10 +8,10 @@ helpFunction(){
   echo "SYNTAX: # dwup"
   echo "SYNTAX: # dwup -option"
   echo "  VALID OPTIONS:"
-  echo "        -all          Creates the Docker Swarm, then deploys all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Creates the Docker Swarm, then deploys the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
-  echo "        -default      Creates the Docker Swarm, then deploys the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
-  echo "        -h || -help   Displays this help message."
+  echo "    -all          Creates the Docker Swarm, then deploys all stacks with a corresponding folder inside the '../configs/' path."
+  echo "    -listed       Creates the Docker Swarm, then deploys the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -default      Creates the Docker Swarm, then deploys the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
   }
@@ -21,7 +21,14 @@ helpFunction(){
 
 # Query which list of stacks the user wants to load.
   if [[ "$1" = "" ]]; then
-    read -r -p "Do you want to deploy the '-default' list of Docker Swarm stacks? [Y/n] " input
+    read -r -p "Do you want to deploy the '-default' list of Docker Swarm stacks? [(Y)es/(N)o] " input
+    case $input in 
+      [nN][oO]|[nN])
+      # Query if Traefik should be only stack added
+      read -r -p "  Should Traefik still be installed (recommended)? [(Y)es/(N)o] " confirm
+      ;;
+      *)
+    esac
     echo
   fi
 
@@ -67,10 +74,17 @@ helpFunction(){
         exit 1
         ;;
     esac
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] || [[ $1 = "--help" ]] ; then
     helpFunction
   else
-    . ${scripts_folder}/docker_stack_deploy.sh "$1"
+    case $confirm in 
+      [yY][eE][sS]|[yY])
+        . ${scripts_folder}/docker_stack_deploy.sh traefik
+      ;;
+      *)
+        . ${scripts_folder}/docker_stack_deploy.sh "$1"
+      ;;
+    esac
   fi
 
   echo

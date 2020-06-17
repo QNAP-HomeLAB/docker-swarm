@@ -50,8 +50,8 @@ helpFunction(){
       remove_list=( "${remove_list[@]}" "traefik" )
       echo " -> ${remove_list[@]}"
       echo
-      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
-      echo
+#      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
+#      echo
     fi
   elif [[ $1 = "traefik" ]]; then
     if [[ "${bounce_list[@]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
@@ -84,8 +84,14 @@ helpFunction(){
     docker stack rm "$stack"
     # The below line is needed only if '.env' file redirect is used
     #rm -f $configs_folder/${stack}/.env
-    echo "*** '$stack' REMOVED, WAITING 10 SECONDS ***"
-    sleep 10
+    for i in "${remove_list[@]}"; do
+      while [ "$(docker service ls --filter label=com.docker.stack.namespace=$i -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$i -q)" ]; 
+      do sleep 1; 
+      done
+    done
+    echo "*** '$stack' REMOVED ***"
+#    echo "*** '$stack' REMOVED, WAITING 10 SECONDS ***"
+#    sleep 10
   done
 
 # Clear the 'remove_list' array now that we are done with it
