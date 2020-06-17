@@ -17,14 +17,14 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
 - **Ports 80, 443, and 8080 *must be _unused_ by your NAS.*** 
   - By default, QTS assigns ports 8080 and 443 as the default HTTP and HTTPS ports for the QNAP Web Admin Console, and assigns 80 as the default HTTP port for the native "Web Server" application. Each of these must be modified to proceed with this guide.
 - Modify these ports as follows to ensure there will be no port conflicts with docker stacks:
-  - **Change default System ports:** In QNAP Web GUI, `Control Panel >> System >> General Settings`, change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
-  - **Change default Web Application ports:** In QNAP Web GUI, `Control Panel >> Applications >> Web Server`, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
+  - **Change default System ports**: In QNAP Web GUI, `Control Panel >> System >> General Settings`, change the default HTTP port to `8880`, and the default HTTPS port to `8443`. 
+  - **Change default Web Application ports**: In QNAP Web GUI, `Control Panel >> Applications >> Web Server`, change the default HTTP port to `9880`, and the default HTTPS port to `9443`.
   - Unless currently in use, consider disabling both the Web Server and MySQL applications in the QNAP GUI Settings.
 - **Ports 80 and 443 must be forwarded from your router to your NAS**. This is *possible* using UPNP in the QNAP GUI, but ***is not recommended!***
   - **Instead, disable UPNP at the router and manually forward ports 80 and 443 to your NAS.**
-  - ***NOTE:*** There are too many possible routers to cover how to forward ports on each, but there are some good guides here if you don't know how to do it for your router: (https://portforward.com/router.htm) or (https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/)
+  - ***NOTE***: There are too many possible routers to cover how to forward ports on each, but there are some good guides here if you don't know how to do it for your router: (https://portforward.com/router.htm) or (https://www.howtogeek.com/66214/how-to-forward-ports-on-your-router/)
 
-**In sum:**
+**Ports Overview**:
 - QTS System ports should be:
   - HTTP : 8880
   - HTTPS: 8443
@@ -76,7 +76,7 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
     - If you **cannot** add the QNAP Club store to the App Center, you may manually download the qpkg file from that link and use it to manually install via the App Center, "Install Manually" button. This is **not preferred** as QNAP cannot check for and notify you of updates to the package.
   - Search for `entware-std` and install that package.
 
-  - **Important:** *DO NOT* CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.
+  - **Important**: *DO NOT* CHOOSE either the `entware-ng` or `entware-3x-std` packages. These have merged and been superceded by `entware-std`.
 
 ---------------------------------------
 
@@ -84,19 +84,20 @@ Please consider joining and contributing to the [QNAP Unofficial Discord](https:
 
 1. Open/Connect an SSH Terminal session to your QNAP NAS. 
     * You can use [PuTTY](https://putty.org/) 
-    * I prefer to use [BitVise](https://www.bitvise.com/ssh-client-download) because this also has an SFTP remove file browser interface.
+    * I prefer to use [BitVise](https://www.bitvise.com/ssh-client-download) because this also has an SFTP remote file browser interface.
+      - Connecting to the NAS using SFTP allows me to edit the docker config files using Notepad++ or Visual Studio Code.
 
 2. Install nano or vi, whichever you are more comfortable with (only one needed)
-    - **RUN:** `opkg install nano`
-    - **RUN:** `opkg install vim`
-    - ***NOTE:*** You must have installed the `entware-std` package as detailed above in Section-2 Step-8 to be able to use the "opkg" installer.
+    - **RUN**: `opkg install nano`
+    - **RUN**: `opkg install vim`
+    - ***NOTE***: You must have installed the `entware-std` package as detailed above in Section-2 Step-8 to be able to use the "opkg" installer.
 
-3. **TYPE:** `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
-    - ***NOTE:*** If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.
-    - ***NOTE:*** **You MUST set the end of line format to UNIX (LF) in order for the profile and scripts to work correctly.**
+3. **TYPE**: `nano /opt/etc/profile` (or `vi /opt/etc/profile` if that is your thing)
+    - ***NOTE***: If you use a Windows client to save the profile (or the scripts below), they will be saved with CR LF and will error.
+    - ***NOTE***: **You MUST set the end of line format to UNIX (LF) in order for the profile and scripts to work correctly.**
   
   - Add the following lines to the end of the file and save.
-    - ***NOTE:*** You will need to restart your ssh or cli session in order to make the profile changes effective.
+    - ***NOTE***: You will need to restart your ssh or cli session in order to make the profile changes effective.
 
 ```bash
 # docker_commands_list -- lists the below custom docker commands
@@ -154,8 +155,9 @@ dsclr(){
 #dwinit(){
 #  bash /share/swarm/scripts/docker_swarm_init.sh "$1"
 #}
+# docker_swarm_setup -- creates a new swarm and overlay network, then starts all declared stacks if desired
 dwup(){
-  bash /share/swarm/scripts/docker_swarm_init.sh traefik
+  bash /share/swarm/scripts/docker_swarm_setup.sh "$1"
 }
 # docker_swarm_leave -- LEAVES the docker swarm. USE WITH CAUTION!
 dwlv(){
@@ -197,52 +199,55 @@ dvlogs(){
   - `dlist` -- docker_commands_list - lists the custom Docker Swarm commands created for managing a QNAP Docker Swarm"
 
   - `dcd` -- docker_compose_dn - stops (brings 'down') a docker-compose container
-      - **SYNTAX:** `dcd traefik`
+      - **SYNTAX**: `dcd traefik`
   - `dcu` -- docker_compose_up - starts (brings 'up') a docker-compose container
-      - **SYNTAX:** `dcu traefik`
+      - **SYNTAX**: `dcu traefik`
   - `dcl` -- docker_compose_logs -- displays 50 log entries for the indicated docker-compose container
-      - **SYNTAX:** `dcl traefik`
+      - **SYNTAX**: `dcl traefik`
 
   - `dsb` -- docker_stack_bounce - removes a single stack then recreates it using $config_folder/stackname/stackname.yml
-      - **SYNTAX:** `dsb privatebin`
-      - **SYNTAX:** `dsb -all`
+      - **SYNTAX**: `dsb privatebin`
+      - **SYNTAX**: `dsb -all`
   - `bounce` -- docker_stack_bounce - removes then recreates all stacks using $config_folder/stackname/stackname.yml
-      - **SYNTAX:** `bounce` (same as `dsb -all`)
+      - **SYNTAX**: `bounce` (same as `dsb -all`)
   - `dsd` -- docker_stack_deploy - deployes a single stack, or a default list of stacks defined in the 'docker_stack_deploy.sh' script
-      - **SYNTAX:** `dsd traefik`
-      - **SYNTAX:** `dsd -default`
-      - **SYNTAX:** `dsd -all`
+      - **SYNTAX**: `dsd traefik`
+      - **SYNTAX**: `dsd -default`
+      - **SYNTAX**: `dsd -all`
   - `dsu` -- docker_stack_up - deploys all stacks defined in `/share/swarm/configs/swarm_stacks.conf`
-      - **SYNTAX:** `dsu` (same as `dsd -all`)
+      - **SYNTAX**: `dsu` (same as `dsd -all`)
   - `dsf` -- docker_stack_folders - creates the folder structure for (1 - 9 listed) stacks
-    - **SYNTAX:** `dsf plex sonarr radarr lidarr bazarr ombi`
+    - **SYNTAX**: `dsf plex sonarr radarr lidarr bazarr ombi`
       - creates the below three folders for each listed stack:
         - `/share/swarm/appdata/appname`
         - `/share/swarm/configs/appname`
         - `/share/swarm/runtime/appname`
   - `dsr` -- docker_stack_remove - removes a single stack, or all stacks listed via `docker stack ls`
-    - **SYNTAX:** `dsr openvpn`
-    - **SYNTAX:** `dsr -all`
+    - **SYNTAX**: `dsr openvpn`
+    - **SYNTAX**: `dsr -all`
   - `dsc` -- docker_stack_clear - removes all stacks
-    - **SYNTAX:** `dsc` (same as `dsr -all`)
+    - **SYNTAX**: `dsc` (same as `dsr -all`)
 
   - `dwup` -- docker_swarm_setup - creates a new swarm, and overlay network, then starts all stacks declared in $configs_folder
-      - **SYNTAX:** `dwup`
+      - **SYNTAX**: `dwup`
   - `dwlv` -- docker_swarm_leave - prunes docker system, leaves swarm - USE WITH CAUTION!
-      - **SYNTAX:** `dwlv`
+      - **SYNTAX**: `dwlv`
   - `dwrm` -- docker_swarm_remove - removes all stacks, prunes docker system, leaves swarm - USE WITH CAUTION!
-      - **SYNTAX:** `dwrm` (same as `dwlv -all`)
+      - **SYNTAX**: `dwrm` (same as `dwlv -all`)
 
   - `dprn` -- docker_system_prune - prunes the Docker system of unused images, networks, and containers
-      - **SYNTAX:** `dprn`
+      - **SYNTAX**: `dprn`
+
+  - `dwinit` -- docker_swarm_init - Performs initialization commands for this swarm/stack setup
+      - **SYNTAX**: `dwinit` 
 
   **See below** in Section-6 and Section-7 for script files that need to be created and added to `/share/swarm/scripts` folder.
       * These script files are required in order to utilize the above shortcut commands.
 
-4. **TYPE:** `id dockeruser` in terminal and note the 'uid' and 'gid'
+4. **TYPE**: `id dockeruser` in terminal and note the 'uid' and 'gid'
     - Enter the discovered userid and groupid into the variables file from Section-6 below.
 
-5. **TYPE:** `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
+5. **TYPE**: `docker network ls` The networks shown should match the following (except the generated NETWORK ID):
 
 ```bash
 [~] # docker network ls
@@ -253,12 +258,12 @@ XXXXXXXXXXXX        none                null                local
 ```
 
 6. If you successfully edited the bash `profile` above, _AND_ saved the scripts from Section-7 below, you can use the shortcut command `dwup` instead of manually performing steps 7 - 9 just below.
-    - **TYPE:** `dwup`
-    - **NOTE:** It is very important to read steps 7 - 9, and make sure the proper networks _were_ created.
+    - **TYPE**: `dwup`
+    - **NOTE**: It is very important to read steps 7 - 9, and make sure the proper networks _were_ created.
 
 7. Run: `docker swarm init --advertise-addr <YOUR NAS IP HERE>` - Use ***YOUR*** nas internal LAN IP address
 
-8. **CHECKPOINT:** Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
+8. **CHECKPOINT**: Run `docker network ls`. Does the list of networks contain one named `docker_gwbridge`?
     * The networks should match the following (except the generated NETWORK ID):
 
 ```bash
@@ -273,8 +278,9 @@ XXXXXXXXXXXX        none                   null                local
 
 - **IMPORTANT: If your configuration is lacking the `docker_gwbridge` network, or differs from this list**, please contact someone on the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd) (ideally in the [#docker-stack channel](https://discord.gg/MzTNQkV)). Do not proceed beyond this point unless your configuration matches the one above, unless you embrace pain and failure and love very complicated problems that could be QNAP's fault.
 
-9. Create the docker network overlay:
-    - **TYPE:** `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
+9. Create the traefik overlay network:
+    - **NOTE**: This step is performed via script if you already installed the bash scripts from Section-7 below.
+    - **TYPE**: `docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public`
 
 ---------------------------------------
 
@@ -282,31 +288,31 @@ XXXXXXXXXXXX        none                   null                local
 
 1. Create the Traefik specific folders (listed below) by typing `dsf traefik`
     - Alternatively, you can manually type these commands into a terminal:
-        - **TYPE:** `mkdir -p /share/swarm/appdata/traefik`
-        - **TYPE:** `mkdir -p /share/swarm/configs/traefik`
-        - **TYPE:** `mkdir -p /share/swarm/runtime/traefik`
+        - **TYPE**: `mkdir -p /share/swarm/appdata/traefik`
+        - **TYPE**: `mkdir -p /share/swarm/configs/traefik`
+        - **TYPE**: `mkdir -p /share/swarm/runtime/traefik`
 
-2. Add the three provided traefik files from the git repository folder "/config/traefik/" to `/share/swarm/configs/traefik` 
+2. Add the three provided traefik files from the git repository folder "/configs/traefik/" to `/share/swarm/configs/traefik` on your NAS.
     - `application.yaml`, `traefik-static.yaml`, `traefik.yml`
 
-3. **EDIT:** _traefik.yml_ and put your cloudflare email and GLOBAL API KEY in lines 7 & 8 
-    **NOTE:** If you are not using cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.yml_ file.
+3. **EDIT**: _traefik.yml_ and put your Cloudflare email and GLOBAL API KEY in lines 7 & 8 
+    **NOTE**: If you are not using Cloudflare you will need to check with the Traefik documentation to add the correct environment settings to your _traefik.yml_ file.
 
-4. **EDIT:** _application.yaml_ and _traefik.yml_ to include your domain name.
+4. **EDIT**: _application.yaml_ and _traefik.yml_ to include your domain name.
 
 5. In an SSH Terminal with your QNAP, run the below commands to set traefik folder/file permissions:
-    - **TYPE:** `rm /share/swarm/configs/traefik/acme.json`
-    - **TYPE:** `touch /share/swarm/configs/traefik/acme.json`
-    - **TYPE:** `chmod 600 /share/swarm/configs/traefik/acme.json`
+    - **TYPE**: `rm /share/swarm/configs/traefik/{traefik.log,acme.json}`
+    - **TYPE**: `touch /share/swarm/configs/traefik/{traefik.log,acme.json}`
+    - **TYPE**: `chmod 600 /share/swarm/configs/traefik/{traefik.log,acme.json}`
 
-6. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
-    - **TYPE:** `ping traefik.<yourdomain.com>` 
-    - **Press:** `ctrl+c` to stop the ping
-    **NOTE:** If you don't get the proper IP during this ping operation, update your DNS settings with your domain provider.
+6. **TYPE**: `dsd traefik` to start the traefik container
 
-7. **TYPE:** `dsd traefik` to start the traefik container
+7. Check that `traefik.<yourdomain.com>` resolves to your WAN IP:
+    - **TYPE**: `ping traefik.<yourdomain.com>` 
+    - **Press**: `ctrl+c` to stop the ping
+    **NOTE**: If you don't get the proper IP during this ping operation, update your DNS settings with your domain provider.
 
-* Enjoy Traefik and add more containers.
+* Enjoy Traefik! Follow these steps for each additional container you want to add.
 
 ---------------------------------------
 
@@ -330,9 +336,9 @@ XXXXXXXXXXXX        none                   null                local
     - Go to _Connections -> Social_
         - CLICK the _Github_ slider
             - Enter your GitHub app "ClientID" and "Client Secret" from the previous step
-        **NOTE:** Ensure the Attribute _"Email Address"_ is ticked
+        **NOTE**: Ensure the Attribute _"Email Address"_ is ticked
         - Click the "Save" button
-        **NOTE:** Make sure the gray/green slider for _GitHub_ is "green"
+        **NOTE**: Make sure the gray/green slider for _GitHub_ is "green"
 
     - Go to _Applications_
         - Click on the "Create Application" button
@@ -341,7 +347,7 @@ XXXXXXXXXXXX        none                   null                local
         - Click the "Create" button
         - Once the app is created, click on the "Settings" tab
             - Use the Auth0 "Client ID" and "Client Secret" in your _application.yaml_ file
-            **NOTE:** Enter these in Lines 22 & 23, replacing the < redacted > tag
+            **NOTE**: Enter these in Lines 22 & 23, replacing the < redacted > tag
             - Ensure "Token Endpoint Authentication Method" drop down box shows as "Post"
             - Enter in your Callback URL(s), for example:
             ```
@@ -354,7 +360,7 @@ XXXXXXXXXXXX        none                   null                local
 
     - Go to _Users & Roles -> Users_
         - Create a user with a real email address and password
-        **NOTE:** _You will use this later so remember it!_
+        **NOTE**: _You will use this later so remember it!_
 
     - Go to _Rules_
         - Click the _Create Rule_ button (top right)
@@ -363,9 +369,9 @@ XXXXXXXXXXXX        none                   null                local
         `const whitelist = [ 'your email here', '2nd email here' ]; //authorized users`
 
 4. Open an SSH Terminal to your QNAP
-    - **TYPE:** `dsr traefik` to remove the Traefik stack
+    - **TYPE**: `dsr traefik` to remove the Traefik stack
         - Wait 10 seconds
-    - **TYPE:** `dsd traefik` to deploy the Traefik stack
+    - **TYPE**: `dsd traefik` to deploy the Traefik stack
         - Wait 30 seconds
     - Launch `https://traefik.<yourdomainhere>`
     - Enter Auth0 authentication login to reach traefik dashboard
@@ -375,8 +381,8 @@ XXXXXXXXXXXX        none                   null                local
 ## 6. Docker Script Variables Setup
 These variable/config files need to be filled in with your information in order to allow the below scripts to properly function.
 
-  * **NOTE:** `docker_swarm_setup.sh` requires your NAS IP to function, which is entered in the `/share/swarm/conrfigs/swarm_vars.conf` file.
-  * **NOTE:** `docker_stack_deploy.sh` uses the pre-defined stack lists in the `/share/swarm/configs/swarm_stacks.conf` file.
+  * **NOTE**: `docker_swarm_setup.sh` requires your NAS IP to function, which is entered in the `/share/swarm/conrfigs/swarm_vars.conf` file.
+  * **NOTE**: `docker_stack_deploy.sh` uses the pre-defined stack lists in the `/share/swarm/configs/swarm_stacks.conf` file.
       * If you do not edit these stack lists, nothing blows up, no bunnies die, just a big pile of nothingness in your swarm.
   
   * **IMPORTANT!!** Please ensure you save these files in UNIX (LF) format.  Windows (CR LF) format _will_ break these scripts.
@@ -495,7 +501,7 @@ Please create these scripts and save them to `/share/swarm/scripts` if you want 
 
 All the stack scripts (`xxx_stack.sh`) require you to edit the stacks list to match your setup.  If you do not edit them they will fail to deploy the stacks you did not list... 
 
-**NOTE:** 
+**NOTE**: 
 
 ##### docker_compose_dn (dcd)
   * stops the entered container
@@ -523,8 +529,106 @@ source /share/swarm/scripts/swarm_vars.conf
 docker-compose -f ${configs_folder}/"$1"/"$1".yml up -d
 ```
 
+##### docker_compose_logs (dcl)
+  * starts the entered container using preconfigured docker_compose files
+```bash
+#!/bin/bash
+# This script displays 50 log entries for the indicated docker-compose container.
+
+# Load config variables from file
+  source /share/swarm/configs/swarm_vars.conf
+
+# Perform scripted action(s)
+  docker-compose docker logs -tf --tail="50" "$1"
+```
+
+##### docker_list_network.sh (dln)
+  * lists the currently active docker networks
+```bash
+#!/bin/bash
+
+# Listing the currently active docker networks
+  echo "*** LISTING CURRENT DOCKER NETWORKS ***"
+  docker network ls
+  echo
+```
+
+##### docker_list_stack.sh (dls)
+  * lists the currently active docker stacks and number of services per stack
+```bash
+#!/bin/bash
+
+# Listing the currently active docker stacks and number of services per stack
+  echo "*** LISTING CURRENT DOCKER SWARM STACKS AND SERVICES ***"
+  docker stack ls
+  echo
+```
+
+##### docker_service_error.sh (dse)
+  * 
+```bash
+#!/bin/bash
+
+# Help message for script
+helpFunction(){
+  echo 
+  echo "This script performs Docker Swarm initial setup tasks on QNAP Container Station architecture."
+  echo
+  echo "SYNTAX: # dve <servicename>"
+  echo "SYNTAX: # dve -option"
+  echo "  NOTE: <servicename> MUST consist of 'appname_servicename' as defined in the .yml file. ex: 'traefik_app' or 'traefik_whoami'"
+  echo "  VALID OPTIONS:"
+  echo "    -h || -help   Displays this help message."
+  echo
+  exit 1 # Exit script after printing help
+  }
+
+# Load config variables from file
+  source /share/swarm/configs/swarm_vars.conf
+
+# Print helpFunction in case parameters are empty, or -h option entered
+  if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] || [[ $1 = "--help" ]] ; then
+    helpFunction
+  fi
+
+# Check the indicated swarm service for errors
+  docker service ps --no-trunc "${1}"
+```
+
+##### docker_service_logs.sh (dsl)
+  * 
+```bash
+#!/bin/bash
+#!/bin/bash
+
+# Help message for script
+helpFunction(){
+  echo 
+  echo "This script performs Docker Swarm initial setup tasks on QNAP Container Station architecture."
+  echo
+  echo "SYNTAX: # dve <servicename>"
+  echo "SYNTAX: # dve -option"
+  echo "  NOTE: <servicename> MUST consist of 'appname_servicename' as defined in the .yml file. ex: 'traefik_app' or 'traefik_whoami'"
+  echo "  VALID OPTIONS:"
+  echo "    -h || -help   Displays this help message."
+  echo
+  exit 1 # Exit script after printing help
+  }
+
+# Load config variables from file
+  source /share/swarm/configs/swarm_vars.conf
+
+# Print helpFunction in case parameters are empty, or -h option entered
+  if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] || [[ $1 = "--help" ]] ; then
+    helpFunction
+  fi
+
+# Check the indicated swarm service for errors
+  docker service logs --no-trunc "${1}"
+```
+
 ##### docker_stack_bounce (dsb)
-  * removes then (re)deployes the listed stacks or '-all' stacks with config files in the folder structure
+  * removes then (re)deploys the listed stacks or '-all' stacks with config files in the folder structure
 ```bash
 #!/bin/bash
 
@@ -536,9 +640,9 @@ helpFunction(){
   echo "SYNTAX: # dsb stack_name"
   echo "SYNTAX: # dsb -option"
   echo "  VALID OPTIONS:"
-  echo "        -all          Re-deploys all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Re-deploys stacks listed in the '../configs/swarm_stacks.conf' config file 'stacks_listed' array."
-  echo "        -default      Re-deploys a default list of stacks defined in the '../configs/swarm_vars.conf' variable file."
+  echo "        -all          Bounces all stacks with a corresponding folder inside the '../configs/' path."
+  echo "        -listed       Bounces the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "        -default      Bounces the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
@@ -555,7 +659,7 @@ helpFunction(){
     IFS=$'\n' bounce_list=( "${stacks_listed[@]}" );
   elif [[ $1 = "-default" ]]; then
     IFS=$'\n' bounce_list=( "${stacks_default[@]}" );
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     helpFunction
   else
     bounce_list=("$@")
@@ -588,8 +692,8 @@ helpFunction(){
   echo "SYNTAX: # dsd -option"
   echo "  VALID OPTIONS:"
   echo "        -all          Deploys all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Deploys stacks listed in the '../configs/swarm_stacks.conf' config file 'stacks_listed' array."
-  echo "        -default      Deploys the 'default' list of stacks defined in the '../configs/swarm_vars.conf' variable file"
+  echo "        -listed       Deploys the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "        -default      Deploys the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
@@ -598,13 +702,15 @@ helpFunction(){
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
   source /share/swarm/configs/swarm_vars.conf
-  source /share/swarm/scripts/docker_stack_bounce.sh
   deploy_list=""
 
 # Define which stack(s) to load using command options
   if [[ $1 = "-all" ]]; then
     if [[ "${bounce_list[@]}" = "" ]]; then
-      IFS=$'\n' deploy_list=( "${stacks_all[@]}" );
+      IFS=$'\n' deploy_list=( $(cd "${configs_folder}" && find -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g') );
+      if [[ "${deploy_list[i]}" = "." ]]; then
+        unset 'deploy_list[i]'
+      fi
     else
       IFS=$'\n' deploy_list=( "${bounce_list[@]}" );
     fi
@@ -612,7 +718,7 @@ helpFunction(){
     IFS=$'\n' deploy_list=( "${stacks_listed[@]}" );
   elif [[ $1 = "-default" ]]; then
     IFS=$'\n' deploy_list=( "${stacks_default[@]}" );
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     # Print helpFunction in case parameters are empty
     helpFunction
   else
@@ -622,7 +728,7 @@ helpFunction(){
 # Display list of stacks to be deployed
   echo "*** DEPLOYING LISTED STACK(S) ***"
   # Remove duplicate entries in deploy_list
-    deploy_list=(`for stack in "${deploy_list[@]}" ; do echo "$stack" ; done | sort -u`)
+    deploy_list=(`for stack in "${deploy_list[@]}" ; do echo "${stack}" ; done | sort -u`)
   # Remove 'traefik' from the deploy_list array
     for i in "${!deploy_list[@]}"; do
       if [[ "${deploy_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
@@ -631,6 +737,10 @@ helpFunction(){
     done
   # Add 'traefik' stack as first item in deploy_list array
     if [ "$(docker service ls --filter name=traefik -q)" = "" ]; then
+      # Create required traefik files
+      #rm "${appdata_folder}"/traefik/{traefik.log,acme.json} # Not sure if this is required. Certs are auto-updated, and why remove previous logs?
+      touch "${appdata_folder}"/traefik/{access.log,traefik.log,acme.json}
+      chmod 600 "${appdata_folder}"/traefik/{access.log,traefik.log,acme.json}
       deploy_list=( "traefik" "${deploy_list[@]}" )
       echo " -> ${deploy_list[@]}"
       echo
@@ -640,7 +750,7 @@ helpFunction(){
       echo " -> ${deploy_list[@]}"
       echo
     fi
-  # Create the 'traefik_public' overlay network if it does not already exist
+  # Create 'traefik_public' overlay network
     if [ "$(docker network ls --filter name=traefik -q)" = "" ]; then
       echo "*** CREATING OVERLAY NETWORK ***"
       docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public
@@ -651,10 +761,20 @@ helpFunction(){
 
 # Deploy indicated stack(s)
   for stack in "${deploy_list[@]}"; do
-    echo "*** DEPLOYING '$stack' ***"
-    docker stack deploy $stack -c ${configs_folder}/${stack}/${stack}.yml
-    echo "**** '$stack' DEPLOYED, WAITING 10 SECONDS ****"
-    sleep 10
+    echo "*** DEPLOYING '${stack}' ***"
+    # The below two lines are needed only if the '.env' file redirect is used
+    ln -sf "${configs_folder}"/"${variables_file}" "${configs_folder}"/"${stack}"/.env
+    sleep 1
+    #. ${scripts_folder}/docker_stack_folders.sh "${stack}"
+    docker stack deploy ${stack} -c "${configs_folder}"/"${stack}"/"${stack}".yml
+    sleep 1
+    if [ "$(docker service ls --filter name="${stack}" -q)" = "" ]; then
+      echo
+      echo "**** ... ERROR ... '${stack}' *NOT* DEPLOYED! ****"
+    else
+      echo "**** '${stack}' DEPLOYED, WAITING 10 SECONDS ****"
+      sleep 10
+    fi
   done
 
 # Clear the 'deploy_list' array now that we are done with it
@@ -680,13 +800,13 @@ helpFunction(){
   echo "  Enter up to nine(9) folder names in a single command, separated by a 'space' character: "
   echo "SYNTAX: dsf -option"
   echo "  VALID OPTIONS:"
-  echo "        -h || -help   Displays this help message."
+  echo "    -h || -help   Displays this help message."
   echo
   echo "The below folder structure is created for each 'folder-name' entered in this command:"
-  echo "    /share/swarm/appdate/<folder-name>"
+  echo "    /share/swarm/appdata/<folder-name>"
   echo "    /share/swarm/configs/<folder-name>"
   echo "    /share/swarm/runtime/<folder-name>"
-  echo "    /share/swarm/secrets/<folder-name>"
+#  echo "    /share/swarm/secrets/<folder-name>"
   echo
   exit 1 # Exit script after printing help
 }
@@ -696,37 +816,41 @@ helpFunction(){
   source /share/swarm/configs/swarm_vars.conf
 
 # Print helpFunction in case parameters are empty, or -h option entered
-  if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  if [[ -z "$1" ]] || [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] || [[ $1 = "--help" ]] ; then
     helpFunction
   fi
 
 # Create folder structure
-  mkdir -p $appdata_folder/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
-  mkdir -p $configs_folder/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
-  mkdir -p $runtime_folder/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
-  mkdir -p $secrets_folder/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
+  mkdir -p ${appdata_folder}/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
+  mkdir -p ${configs_folder}/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
+  mkdir -p ${runtime_folder}/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
+  #mkdir -p $secrets_folder/{$1,$2,$3,$4,$5,$6,$7,$8,$9}
+  stacks_list="$@"
+  for stack in "${!stacks_list[@]}"; do
+    #mkdir -p ${appdata_folder}/${stack}
+    #mkdir -p ${configs_folder}/${stack}
+    #mkdir -p ${runtime_folder}/${stack}
+    if [[ "${stacks_list[stack]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+      if [ ! -f ${appdata_folder}/traefik/{traefik.log,acme.json} ]; then
+          echo "File not found!"
+      fi
+      # Create required traefik files
+      #rm "${configs_folder}"/traefik/{traefik.log,acme.json} # Not sure if this is required, why remove previous logs/certs?
+      touch ${appdata_folder}/traefik/{traefik.log,acme.json}
+      chmod 600 ${appdata_folder}/traefik/{traefik.log,acme.json}
+    fi
+  done
   echo "DOCKER SWARM FOLDER STRUCTURE CREATED FOR LISTED STACKS"
   echo " - $@"
   echo
 
-# Change all swarm folders to the 'user:group' to the 'dockuser' and appropriate group number
-  chown -R $var_user:$var_group $swarm_folder
-  echo "FOLDER OWNERSHIP UPDATED"
-  echo 
+# Change all swarm folders to the 'dockuser' 'user:group' values
+  #chown -R $var_user:$var_group $swarm_folder
+  #echo "FOLDER OWNERSHIP UPDATED"
+  #echo 
 
 # Print script complete message
-  echo "DOCKER SWARM STACKS FOLDER STRUCTURE CREATION SCRIPT COMPLETE"
-  echo
-```
-
-##### docker_stack_list (dsl)
-  * lists all current swarm stacks and the number of services in each stack
-```bash
-#!/bin/bash
-
-# Listing the currently active docker stacks and number of services per stack
-  echo "*** LISTING CURRENT DOCKER SWARM STACKS AND SERVICES ***"
-  docker stack ls
+  echo "DOCKER SWARM STACK FOLDER CREATION SCRIPT COMPLETE"
   echo
 ```
 
@@ -743,9 +867,9 @@ helpFunction(){
   echo "SYNTAX: # dsr stack_name"
   echo "SYNTAX: # dsr -option"
   echo "  VALID OPTIONS:"
-  echo "        -all          Removes all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Removes stacks listed in the '../configs/swarm_stacks.conf' config file 'stacks_listed' array."
-  echo "        -default      Removes a default list of stacks defined in the '../configs/swarm_vars.conf' variable file."
+  echo "        -all          Removes all stacks currently listed with 'docker stack ls' command."
+  echo "        -listed       Removes the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "        -default      Removes the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
@@ -754,7 +878,6 @@ helpFunction(){
 # Load config variables from file
   source /share/swarm/configs/swarm_stacks.conf
   source /share/swarm/configs/swarm_vars.conf
-  source /share/swarm/scripts/docker_stack_bounce.sh
   remove_list=""
 
 # Define which stack to remove using command options
@@ -770,52 +893,61 @@ helpFunction(){
       remove_list=("$@")
   fi
 
-# Display list of stacks to be removed
+# Remove indicated stacks
   echo "****** REMOVING LISTED STACK(S) ******"
   # Remove duplicate entries in remove_list
-    remove_list=(`for stack in "${remove_list[@]}" ; do echo "$stack" ; done | sort -u`)
+  remove_list=(`for stack in "${remove_list[@]}" ; do echo "$stack" ; done | sort -u`)
   # Remove 'traefik' from the remove_list array
-    for i in "${!remove_list[@]}"; do
-      if [[ "${remove_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
-        unset 'remove_list[i]'
-      fi
-    done
+  for i in "${!remove_list[@]}"; do
+    if [[ "${remove_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+      unset 'remove_list[i]'
+    fi
+  done
   # If removing '-all' stacks, add 'traefik' back in as last stack in remove_list
-    if [[ $1 = "-all" ]]; then
-      if [ "$(docker service ls --filter name=traefik -q)" != "" ]; then
+  if [[ "$1" = [tT][rR][aA][eE][fF][iI][kK] ]] || [[ $1 = "-all" ]]; then
+    if [ "$(docker service ls --filter name=traefik -q)" != "" ]; then
+      remove_list=( "${remove_list[@]}" "traefik" )
+      echo " -> ${remove_list[@]}"
+      echo
+#      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
+#      echo
+    fi
+  elif [[ $1 = "traefik" ]]; then
+    if [[ "${bounce_list[@]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
+      input=yes;
+    else
+      read -r -p "Are you sure you want to remove the 'traefik' stack? This could cause apps to be inaccessible. [Y/N] " input
+    fi
+    case $input in
+      [yY][eE][sS]|[yY])
         remove_list=( "${remove_list[@]}" "traefik" )
         echo " -> ${remove_list[@]}"
         echo
-        echo "*** 'Traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
-        echo
-      fi
-    elif [[ $1 = "traefik" ]]; then
-      read -r -p "Are you sure you want to remove the 'Traefik' stack? This could cause apps to be inaccessible. [Y/n] " input
-      case $input in
-        [yY][eE][sS]|[yY])
-          remove_list=( "${remove_list[@]}" "traefik" )
-          echo " -> ${remove_list[@]}"
-          echo
-          ;;
-        [nN][oO]|[nN])
-          echo "** 'Traefik' STACK WILL NOT BE REMOVED **";
-          ;;
-        *)
-          echo "INVALID INPUT: Must be any case-insensitive variation of '(y)es' or '(n)o'."
-          exit 1
-          ;;
-      esac
-    else
-      echo " -> ${remove_list[@]}"
-      echo
-    fi
+        ;;
+      [nN][oO]|[nN])
+        echo "** 'traefik' STACK WILL NOT BE REMOVED **";
+        ;;
+      *)
+        echo "INVALID INPUT: Must be any case-insensitive variation of '(y)es' or '(n)o'."
+        exit 1
+        ;;
+    esac
+  else
+    echo " -> ${remove_list[@]}"
+    echo
+  fi
 
 # Remove indicated stack(s)
   for stack in "${remove_list[@]}"; do
     echo "**** REMOVING '$stack' ****"
     docker stack rm "$stack"
-    echo "*** '$stack' REMOVED, WAITING 10 SECONDS ***"
-    sleep 10
+    # The below line is needed only if '.env' file redirect is used
+    #rm -f $configs_folder/${stack}/.env
+    # Pause until stack is removed
+    while [ "$(docker service ls --filter label=com.docker.stack.namespace=$stack -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$stack -q)" ]; 
+    do sleep 1; 
+    done
+    echo "*** '$stack' REMOVED ***"
   done
 
 # Clear the 'remove_list' array now that we are done with it
@@ -823,7 +955,27 @@ helpFunction(){
   echo
 
 # Pruning the system is optional but recommended
-  . ${scripts_folder}/docker_system_prune.sh -f
+  
+  #echo " IT IS RECOMMENDED TO PRUNE THE SYSTEM OF UNUSED NETWORKS/CONTAINERS. TYPE 'dprn' OR 'docker system prune' "
+
+  if [[ "${bounce_list[@]}" = "" ]]; then
+    read -r -p "It is recommended to prune the docker system after removing a stack. Do this now? [Y/N] " input
+  else
+    input=no;
+  fi
+  case $input in
+    [yY][eE][sS]|[yY])
+      . ${scripts_folder}/docker_system_prune.sh -f
+      ;;
+    [nN][oO]|[nN])
+      echo "** DOCKER SYSTEM WILL NOT BE PRUNED, MANUAL PRUNE RECOMMENDED **";
+      echo
+      ;;
+    *)
+      echo "INVALID INPUT: Must be any case-insensitive variation of '(y)es' or '(n)o'."
+      exit 1
+      ;;
+  esac
 
 # Print script complete message
   echo "****** STACK REMOVE SCRIPT COMPLETE ******"
@@ -845,6 +997,7 @@ helpFunction(){
   echo "SYNTAX: # dwlv -option"
   echo "  VALID OPTIONS:"
   echo "        -all          Removes all stacks with a corresponding folder inside the '../configs/' path, then laves the Docker Swarm."
+  echo "        -noremove     Does *NOT* remove any currently deployed stacks, but still leaves the swarm"
   echo "        -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
@@ -856,29 +1009,36 @@ helpFunction(){
 # Check for '-noremove' command options
   if [[ "$1" = "-noremove" ]] ; then
     input=no;
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ $1 = "-all" ]] ; then
+    input=yes;
+  elif [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
     helpFunction
   else
     # Query if all stacks should be removed before leaving swarm
-    read -r -p "Do you want to remove all Docker Swarm stacks (it is highly recommended)? [Yes/No] " input
+    read -r -p "Do you want to remove all Docker Swarm stacks (highly recommended)? [(Y)es/(N)o] " input
     echo
   fi
 
 # Remove stacks if input is Yes
   case $input in
     [yY][eE][sS]|[yY])
-      # remove all services in docker swarm
-      . ${scripts_folder}/docker_stack_remove.sh -all
+      # Query if all stacks should be removed before leaving swarm
+      read -r -p "Are you certain you want all Docker Swarm stacks removed? [(Y)es/(N)o] " confirm
+      case $confirm in 
+        [yY][eE][sS]|[yY])
+        # remove all services in docker swarm
+        . ${scripts_folder}/docker_stack_remove.sh -all
+        ;;
+        *)
+        exit 1
+      esac
       ;;
     [nN][oO]|[nN])
       echo "** DOCKER SWARM STACKS WILL NOT BE REMOVED **";
       # Pruning the system is optional but recommended
         . ${scripts_folder}/docker_system_prune.sh -f
       ;;
-    *)
-      echo "** INVALID INPUT: Must be any case-insensitive variation of 'yes' or 'no'.";
-      exit 1
-      ;;
+    *) echo "INVALID INPUT: Must be any case-insensitive variation of 'yes' or 'no'." break ;;
   esac
 
 # Leave the swarm
@@ -902,10 +1062,10 @@ helpFunction(){
   echo "SYNTAX: # dwup"
   echo "SYNTAX: # dwup -option"
   echo "  VALID OPTIONS:"
-  echo "        -all          Creates the Docker Swarm, then deploys all stacks with a corresponding folder inside the '../configs/' path."
-  echo "        -listed       Creates the Docker Swarm, then deploys stacks listed in the '../configs/swarm_stacks.conf' config file 'stacks_listed' array."
-  echo "        -default      Creates the Docker Swarm, then deploys a default list of stacks defined in the '../configs/swarm_vars.conf' variable file."
-  echo "        -h || -help   Displays this help message."
+  echo "    -all          Creates the Docker Swarm, then deploys all stacks with a corresponding folder inside the '../configs/' path."
+  echo "    -listed       Creates the Docker Swarm, then deploys the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -default      Creates the Docker Swarm, then deploys the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
   }
@@ -915,9 +1075,16 @@ helpFunction(){
 
 # Query which list of stacks the user wants to load.
   if [[ "$1" = "" ]]; then
-    read -r -p "Do you want to deploy the '-default' list of Docker Swarm stacks? [Y/n] " input
+    read -r -p "Do you want to deploy the '-default' list of Docker Swarm stacks? [(Y)es/(N)o] " input
+    case $input in 
+      [nN][oO]|[nN])
+      # Query if Traefik should be only stack added
+      read -r -p "  Should Traefik still be installed (recommended)? [(Y)es/(N)o] " confirm
+      ;;
+      *)
+    esac
     echo
-  fi
+fi
 
 # Swarm initialization
   echo "*** INITIALIZING SWARM ***"
@@ -933,6 +1100,20 @@ helpFunction(){
   sleep 15
   echo
 
+# List out current docker networks to ensure required networks were created
+  if [ "$(docker network ls --filter name=traefik -q)" = "" ] || [ "$(docker network ls --filter name=gwbridge -q)" = "" ]; then
+    docker network ls
+    echo
+    echo "*** THE ABOVE LIST MUST INCLUDE THE 'docker_gwbridge' AND 'traefik_public' NETWORKS ***"
+    echo "*** IF EITHER OF THOSE NETWORKS ARE NOT LISTED, YOU MUST LEAVE, THEN RE-INITIALIZE THE SWARM ***"
+    echo "*** IF YOU HAVE ALREADY ATTEMPTED TO RE-INITIALIZE, ASK FOR HELP HERE: https://discord.gg/KekSYUE ***"
+    echo
+    echo "** DOCKER SWARM STACKS WILL NOT BE DEPLOYED **"
+    echo
+    echo "******* ... ERROR ... DOCKER SWARM SETUP WAS NOT SUCCESSFUL *******"
+    exit 1
+  fi
+
 # Deploy the list of pre-defined stacks
   if [[ "$1" = "" ]]; then
     case $input in
@@ -947,19 +1128,17 @@ helpFunction(){
         exit 1
         ;;
     esac
-  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] ; then
+  elif [[ $1 = "" ]] || [[ $1 = "-h" ]] || [[ $1 = "-help" ]] || [[ $1 = "--help" ]] ; then
     helpFunction
   else
-    . ${scripts_folder}/docker_stack_deploy.sh "$1"
-  fi
-
-# List out current docker networks to ensure required networks were created
-  if [ "$(docker network ls --filter name=traefik -q)" = "" ] || [ "$(docker network ls --filter name=gwbridge -q)" = "" ]; then
-    docker network ls
-    echo
-    echo "*** THE ABOVE LIST MUST HAVE 'docker_gwbridge' AND 'traefik_public' LISTED ***"
-    echo "*** IF EITHER OF THOSE NETWORKS ARE NOT LISTED, YOU MUST RE-INITIALIZE THE SWARM ***"
-    echo "*** IF YOU HAVE ALREADY ATTEMPTED TO RE-INITIALIZE, ASK FOR HELP HERE: https://discord.gg/KekSYUE ***"
+    case $confirm in 
+      [yY][eE][sS]|[yY])
+        . ${scripts_folder}/docker_stack_deploy.sh traefik
+      ;;
+      *)
+        . ${scripts_folder}/docker_stack_deploy.sh "$1"
+      ;;
+    esac
   fi
 
   echo
