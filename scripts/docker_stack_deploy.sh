@@ -24,7 +24,7 @@ helpFunction(){
 # Define which stack(s) to load using command options
   if [[ $1 = "-all" ]]; then
     if [[ "${bounce_list[@]}" = "" ]]; then
-      IFS=$'\n' deploy_list=( $(cd ${configs_folder} && find -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g') );
+      IFS=$'\n' deploy_list=( $(cd "${configs_folder}" && find -maxdepth 1 -type d -not -path '*/\.*' | sed 's/^\.\///g') );
       if [[ "${deploy_list[i]}" = "." ]]; then
         unset 'deploy_list[i]'
       fi
@@ -45,7 +45,7 @@ helpFunction(){
 # Display list of stacks to be deployed
   echo "*** DEPLOYING LISTED STACK(S) ***"
   # Remove duplicate entries in deploy_list
-    deploy_list=(`for stack in "${deploy_list[@]}" ; do echo "$stack" ; done | sort -u`)
+    deploy_list=(`for stack in "${deploy_list[@]}" ; do echo "${stack}" ; done | sort -u`)
   # Remove 'traefik' from the deploy_list array
     for i in "${!deploy_list[@]}"; do
       if [[ "${deploy_list[i]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
@@ -54,38 +54,47 @@ helpFunction(){
     done
   # Add 'traefik' stack as first item in deploy_list array
     if [ "$(docker service ls --filter name=traefik -q)" = "" ]; then
+      # Create required traefik files
+      #rm "${appdata_folder}"/traefik/{traefik.log,acme.json} # Not sure if this is required. Certs are auto-updated, and why remove previous logs?
+      touch "${appdata_folder}"/traefik/{access.log,traefik.log,acme.json}
+      chmod 600 "${appdata_folder}"/traefik/{access.log,traefik.log,acme.json}
       deploy_list=( "traefik" "${deploy_list[@]}" )
       echo " -> ${deploy_list[@]}"
-      echo
-      echo "*** TRAEFIK MUST BE THE FIRST DEPLOYED SWARM STACK ***"
       echo
     else
       echo " -> ${deploy_list[@]}"
       echo
     fi
-  # Create the 'traefik_public' overlay network if it does not already exist
+  # Create 'traefik_public' overlay network
     if [ "$(docker network ls --filter name=traefik -q)" = "" ]; then
       echo "*** CREATING OVERLAY NETWORK ***"
       docker network create --driver=overlay --subnet=172.1.1.0/22 --attachable traefik_public
-      echo "***** OVERLAY NETWORK CREATED, WAITING 15 SECONDS *****"
-      sleep 15
+      # Pause until 'network create' operation is finished
+      while [ "$(docker network ls --filter name=traefik -q)" = ""]; 
+      do sleep 1; 
+      done
+      echo "***** 'traefik_public' OVERLAY NETWORK CREATED *****"
       echo
     fi
 
 # Deploy indicated stack(s)
   for stack in "${deploy_list[@]}"; do
-    echo "*** DEPLOYING '$stack' ***"
-    # The below two lines are needed only if '.env' file redirect is used
-    #ln -sf $configs_folder/$variables_file $configs_folder/${stack}/.env
-    #sleep 1
-    docker stack deploy $stack -c ${configs_folder}/${stack}/${stack}.yml
+    echo "*** DEPLOYING '${stack}' ***"
+    # The below two lines are needed only if the '.env' file redirect is used
+    ln -sf "${configs_folder}"/"${variables_file}" "${configs_folder}"/"${stack}"/.env
     sleep 1
-    if [ "$(docker service ls --filter name=$stack -q)" = "" ]; then
+    #. ${scripts_folder}/docker_stack_folders.sh "${stack}"
+    docker stack deploy ${stack} -c "${configs_folder}"/"${stack}"/"${stack}".yml
+    sleep 1
+    if [ "$(docker service ls --filter name="${stack}" -q)" = "" ]; then
       echo
-      echo "**** ... ERROR ... '$stack' *NOT* DEPLOYED! ****"
+      echo "**** ... ERROR ... '${stack}' *NOT* DEPLOYED! ****"
     else
-      echo "**** '$stack' DEPLOYED, WAITING 10 SECONDS ****"
-      sleep 10
+    # Pause until stack is deployed
+    while [ "$(docker service ls --filter label=com.docker.stack.namespace=$stack -q)" = "" ]; 
+    do sleep 1; 
+    done
+    echo "*** '$stack' DEPLOYED ***"
     fi
   done
 

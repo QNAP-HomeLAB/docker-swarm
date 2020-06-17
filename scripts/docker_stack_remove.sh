@@ -8,10 +8,10 @@ helpFunction(){
   echo "SYNTAX: # dsr stack_name"
   echo "SYNTAX: # dsr -option"
   echo "  VALID OPTIONS:"
-  echo "        -all          Removes all stacks currently listed with 'docker stack ls' command."
-  echo "        -listed       Removes the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
-  echo "        -default      Removes the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
-  echo "        -h || -help   Displays this help message."
+  echo "    -all          Removes all stacks currently listed with 'docker stack ls' command."
+  echo "    -listed       Removes the 'listed' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -default      Removes the 'default' array of stacks defined in '../configs/swarm_stacks.conf'"
+  echo "    -h || -help   Displays this help message."
   echo
   exit 1 # Exit script after printing help
   }
@@ -50,8 +50,6 @@ helpFunction(){
       remove_list=( "${remove_list[@]}" "traefik" )
       echo " -> ${remove_list[@]}"
       echo
-#      echo "*** 'traefik' MUST BE THE LAST REMOVED SWARM STACK ***"
-#      echo
     fi
   elif [[ $1 = "traefik" ]]; then
     if [[ "${bounce_list[@]}" = [tT][rR][aA][eE][fF][iI][kK] ]]; then
@@ -84,42 +82,16 @@ helpFunction(){
     docker stack rm "$stack"
     # The below line is needed only if '.env' file redirect is used
     #rm -f $configs_folder/${stack}/.env
-    for i in "${remove_list[@]}"; do
-      while [ "$(docker service ls --filter label=com.docker.stack.namespace=$i -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$i -q)" ]; 
-      do sleep 1; 
-      done
+    # Pause until stack is removed
+    while [ "$(docker service ls --filter label=com.docker.stack.namespace=$stack -q)" ] || [ "$(docker network ls --filter label=com.docker.stack.namespace=$stack -q)" ]; 
+    do sleep 1; 
     done
     echo "*** '$stack' REMOVED ***"
-#    echo "*** '$stack' REMOVED, WAITING 10 SECONDS ***"
-#    sleep 10
   done
 
 # Clear the 'remove_list' array now that we are done with it
   unset remove_list IFS
   echo
-
-# Pruning the system is optional but recommended
-  
-  #echo " IT IS RECOMMENDED TO PRUNE THE SYSTEM OF UNUSED NETWORKS/CONTAINERS. TYPE 'dprn' OR 'docker system prune' "
-
-  if [[ "${bounce_list[@]}" = "" ]]; then
-    read -r -p "It is recommended to prune the docker system after removing a stack. Do this now? [Y/N] " input
-  else
-    input=no;
-  fi
-  case $input in
-    [yY][eE][sS]|[yY])
-      . ${scripts_folder}/docker_system_prune.sh -f
-      ;;
-    [nN][oO]|[nN])
-      echo "** DOCKER SYSTEM WILL NOT BE PRUNED, MANUAL PRUNE RECOMMENDED **";
-      echo
-      ;;
-    *)
-      echo "INVALID INPUT: Must be any case-insensitive variation of '(y)es' or '(n)o'."
-      exit 1
-      ;;
-  esac
 
 # Print script complete message
   echo "****** STACK REMOVE SCRIPT COMPLETE ******"
