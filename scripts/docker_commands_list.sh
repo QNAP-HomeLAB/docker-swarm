@@ -1,32 +1,133 @@
 #!/bin/bash
 
+## Docker shortcut commands and aliases file
 # Load config variables from file
-  source /share/swarm/configs/swarm_vars.conf
+  source /share/docker/scripts/bash-colors.env
+  source /share/docker/compose/compose_vars.env
+  source /share/docker/swarm/swarm_vars.env
 
+helpFunction(){
+  echo -e "${blu}[-> Custom bash commands created to manage a QNAP based Docker Swarm <-]${DEF}"
   echo
-  echo "Custom bash commands created to manage a QNAP based Docker Swarm."
+  echo -e " ${blu} COMMAND       -- SCRIPT FILE NAME     -- COMMAND DESCRIPTION${DEF}"
+  echo -e "  ${cyn}dlist${DEF}         -- ${ylw}docker_commands_list${DEF} -- lists the custom Docker Swarm commands created for managing a QNAP Docker Swarm"
+  echo -e "  ${cyn}dcd${DEF}           -- ${ylw}docker_compose_dn${DEF}    -- stops (brings 'down') a docker-compose container"
+  echo -e "  ${cyn}dcu${DEF}           -- ${ylw}docker_compose_up${DEF}    -- starts (brings 'up') a docker-compose container"
+  echo -e "  ${cyn}dln${DEF}           -- ${ylw}docker_list_network${DEF}  -- lists currently created docker networks"
+  echo -e "  ${cyn}dls${DEF}           -- ${ylw}docker_list_stack${DEF}    -- lists currently deployed docker swarm stacks and services"
+  echo -e "  ${cyn}dsb | bounce${DEF}  -- ${ylw}docker_stack_bounce${DEF}  -- removes stack then recreates it using '${ylw}\$swarm_configs/${cyn}stackname${DEF}/${cyn}stackname.yml${DEF}' (bounce == '${cyn}dsb -all${DEF}')"
+  echo -e "  ${cyn}dsd | dsup${DEF}    -- ${ylw}docker_stack_deploy${DEF}  -- deploys stack, or a list of stacks defined in '${ylw}\$swarm_configs/${cyn}swarm_stacks.conf${DEF}' (dsup == '${cyn}dsd -all${DEF}')"
+  echo -e "  ${cyn}dsr | dsclr${DEF}   -- ${ylw}docker_stack_remove${DEF}  -- removes stack, or ${cyn}-all${DEF} stacks listed via 'docker stack ls' (dsclr == '${cyn}dsr -all${DEF}')"
+  echo -e "  ${cyn}dsf${DEF}           -- ${ylw}docker_stack_folders${DEF} -- creates swarm folder structure for (1 - 9 listed) stacks"
+  echo -e "  ${cyn}dscfg${DEF}         -- ${ylw}docker_stack_configs${DEF} -- lists existing 'stackname.yml' config files in the '${ylw}\$swarm_configs/' folder structure"
+  echo -e "  ${cyn}dwup | dwinit${DEF} -- ${ylw}docker_swarm_setup${DEF}   -- swarm setup script, (${cyn}dwinit${DEF} == 'dwup -init' which downloads install script from github)"
+  echo -e "  ${cyn}dwlv | dwclr${DEF}  -- ${ylw}docker_swarm_leave${DEF}   -- USE WITH CAUTION! - prunes docker system, leaves swarm (dwclr == 'dwlv -${cyn}all${DEF}')"
+  echo -e "  ${cyn}dprn${DEF}          -- ${ylw}docker_system_prune${DEF}  -- prunes the Docker system of unused images, networks, and containers"
   echo
-  echo "COMMAND  | SCRIPT FILE NAME     | COMMAND DESCRIPTION"
-  echo
-  echo " dlist   | docker_commands_list | lists the custom Docker Swarm commands created for managing a QNAP Docker Swarm"
-  echo " dcd     | docker_compose_dn    | stops (brings 'down') a docker-compose container"
-  echo " dcu     | docker_compose_up    | starts (brings 'up') a docker-compose container"
-  echo " dcl     | docker_compose_logs  | displays 50 log entries for the indicated docker-compose container"
-  echo " dln     | docker_list_network  | lists currently created docker networks"
-  echo " dls     | docker_list_stack    | lists currently deployed docker swarm stacks and services"
-  echo " dlv     | docker_list_volume   | lists currently unused docker volumes"
-  echo " dsb     | docker_stack_bounce  | removes a single stack then recreates it using '$configs_folder/<stackname>/<stackname>.yml'"
-  echo "  bounce | docker_stack_bounce  | removes all active stacks then recreates them using '$configs_folder/<stackname>/<stackname>.yml'"
-  echo " dsd     | docker_stack_deploy  | deploys a single stack, or a default list of stacks defined in '$configs_folder/swarm_stacks.conf'"
-  echo "  dsup   | docker_stack_deploy  | same as 'dsd -all' which deploys all stacks with a config folder listed in '$configs_folder'/"
-  echo " dsf     | docker_stack_folders | creates the folder structure for (1 - 9 listed) stacks"
-  echo " dsr     | docker_stack_remove  | removes a single stack, or all stacks listed via 'docker stack ls'"
-  echo "  dsclr  | docker_stack_remove  | same as 'dsr -all', does not accept options"
-  echo " dwinit  | docker_swarm_init    | updates 'docker_swarm_init.sh' from github, initializes swarm, creates overlay network, and deploys stacks"
-  echo " dwup    | docker_swarm_setup   | initializes a new swarm, creates an overlay network, then deploys traefik"
-  echo " dwlv    | docker_swarm_leave   | USE WITH CAUTION! - prunes docker system, leaves swarm"
-  echo "  dwclr  | docker_swarm_leave   | USE WITH CAUTION! - removes ALL stacks, prunes docker system, leaves swarm"
-  echo " dprn    | docker_system_prune  | prunes the Docker system of unused images, networks, volumes, and containers"
-  echo " dve     | docker_service_error | lists errors for the indicated 'stackname_appname' (both names are required)"
-  echo " dvl     | docker_service_logs  | lists logs for the indicated 'stackname_appname' (both names are required)."
-  echo
+  }
+
+# logical action check
+  if [[ $1 = "-execute" ]]; then
+    # docker_commands_list -- lists the below custom docker commands
+    dlist(){ 
+      bash /share/docker/scripts/docker_commands_list.sh "$1"
+      }
+    # docker_list_configs -- lists existing compose stack config files
+    dccfg(){ 
+      bash /share/docker/scripts/docker_list_configs.sh -compose 
+      }
+    # docker_compose_dn -- stops the entered container
+    dcd(){ 
+      bash /share/docker/scripts/docker_compose_dn.sh "$1" 
+      }
+    # docker_compose_up -- starts the entered container using preconfigured docker_compose files
+    dcu(){ 
+      bash /share/docker/scripts/docker_compose_up.sh "$1" 
+      }
+    # docker_compose_logs -- displays 50 log entries for the indicated docker-compose container
+    dcl(){ 
+      bash /share/docker/scripts/docker_compose_logs.sh "$1" 
+      }
+    # docker_list_configs -- lists existing stack config files for either swarm or compose filepaths
+    dlc(){ 
+      bash /share/docker/scripts/docker_list_configs.sh $1 
+      }
+    # docker_list_stack -- lists all stacks and number of services inside each stack
+    dls(){ 
+      bash /share/docker/scripts/docker_list_stack.sh 
+      }
+    # docker_list_network -- lists current docker networks
+    dln(){ 
+      bash /share/docker/scripts/docker_list_network.sh 
+      }
+    # docker_list_volume -- lists unused docker volumes
+    dlv(){ 
+      bash /share/docker/scripts/docker_list_volume.sh 
+      }
+    # docker_stack_bounce -- removes then re-deploys the listed stacks or '-all' stacks with config files in the folder structure
+    dsb(){ 
+      bash /share/docker/scripts/docker_stack_bounce.sh "$1" 
+      }
+    bounce(){ 
+      bash /share/docker/scripts/docker_stack_bounce.sh -all 
+      }
+    # docker_stack_deploy -- deploys a single stack as defind in the configs folder structure
+    dsd(){ 
+      bash /share/docker/scripts/docker_stack_deploy.sh "$1" 
+      }
+    dsup(){ 
+      bash /share/docker/scripts/docker_stack_deploy.sh -all 
+      }
+    # docker_stack_folders -- creates the folder structure required for each listed stack name (up to 9 per command)
+    dsf(){ 
+      bash /share/docker/scripts/docker_stack_folders.sh "$1" "$2" "$3" "$4" "$5" "$6" "$7" "$8" "$9" 
+      }
+    # docker_stack_remove -- removes a single stack
+    dsr(){ 
+      bash /share/docker/scripts/docker_stack_remove.sh "$1" 
+      }
+    # docker_stack_remove -- removes all swarm stack
+    dsclr(){ 
+      bash /share/docker/scripts/docker_stack_remove.sh -all 
+      }
+    # docker_list_configs -- lists existing swarm stack config files
+    dwcfg(){ 
+      bash /share/docker/scripts/docker_list_configs.sh -swarm 
+      }
+    # docker_swarm_initialize -- Downloads and executes the docker_swarm_setup.sh script
+    dwinit(){ 
+      bash /share/docker/scripts/docker_swarm_init.sh traefik
+      # bash mkdir -pm 766 /share/docker/scripts && curl -fsSL https://raw.githubusercontent.com/Drauku/QNAP-Docker-Swarm-Setup/master/scripts/docker_swarm_setup.sh > /share/docker/scripts/docker_swarm_setup.sh && . /share/docker/scripts/docker_swarm_setup.sh -setup 
+      }
+    dwup(){ 
+      bash /share/docker/scripts/docker_swarm_init.sh "$1" 
+      }
+    # docker_swarm_leave -- LEAVES the docker swarm. USE WITH CAUTION!
+    dwlv(){ 
+      bash /share/docker/scripts/docker_swarm_leave.sh "$1" 
+      }
+    # docker_swarm_clear -- REMOVES all swarm stacks, REMOVES the overlay network, and LEAVES the swarm. USE WITH CAUTION!
+    dwclr(){ 
+      bash /share/docker/scripts/docker_swarm_leave.sh -all 
+      }
+    # docker_system_prune -- prunes the docker system (removes unused images and containers and networks)
+    dprn(){ 
+      bash /share/docker/scripts/docker_system_prune.sh 
+      }
+    # docker_service_errors -- displays 'docker ps --no-trunk <servicename>' command output
+    dve(){ 
+      bash /share/docker/scripts/docker_service_error.sh "$1" 
+      }
+    dverror(){ 
+      bash /share/docker/scripts/docker_service_error.sh "$1" 
+      }
+    # docker_service_logs -- displays 'docker service logs <servicename>' command output
+    dvl(){ 
+      bash /share/docker/scripts/docker_service_logs.sh "$1" 
+      }
+    dvlogs(){ 
+      bash /share/docker/scripts/docker_service_logs.sh "$1" 
+      }
+    echo -e "[-> Docker aliases for QNAP devices imported <-]"
+  else helpFunction;
+  fi

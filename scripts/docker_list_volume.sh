@@ -1,10 +1,15 @@
 #!/bin/bash
+# Load config variables from file
+  source /share/docker/scripts/bash-colors.env
 
-# Listing the unused docker volumes
-  echo "*** LISTING UNUSED DOCKER VOLUMES ***"
+# Listing the currently active docker networks
+  echo -e "${blu}[-> LISTING UNUSED DOCKER VOLUMES <-]${def}"
   if [ ! "$(docker volume ls -qf dangling=true)" = "" ]; then
-    docker volume ls -qf dangling=true
+    docker volume ls
+    # docker volume ls -qf dangling=true
   else
-    echo " -> no 'dangling' volumes exist "
+    #prnt " -> ${YLW}no 'dangling' volumes exist${NC}"
+    echo -e "${ylw} -> no volumes exist${def}"
+    # pYLW " -> no 'dangling' volumes exist"
   fi
   echo
