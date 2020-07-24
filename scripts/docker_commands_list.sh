@@ -112,7 +112,7 @@ helpFunction(){
       }
     # docker_system_prune -- prunes the docker system (removes unused images and containers and networks)
     dprn(){ 
-      bash /share/docker/scripts/docker_system_prune.sh 
+      bash /share/docker/scripts/docker_system_prune.sh $1
       }
     # docker_service_errors -- displays 'docker ps --no-trunk <servicename>' command output
     dve(){ 
