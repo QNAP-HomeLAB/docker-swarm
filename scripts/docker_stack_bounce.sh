@@ -1,21 +1,21 @@
 #!/bin/bash
 # Load config variables from file
-  source /share/docker/scripts/bash-colors.env
+  source /share/docker/scripts/.bash_colors.env
+  source /share/docker/scripts/.docker_vars.env
   source /share/docker/swarm/swarm_stacks.conf
-  source /share/docker/swarm/swarm_vars.env
   bounce_list=""
 
 # Help message for script
 helpFunction(){
   echo -e "${blu}[-> This script bounces (removes then re-deploys) a single or pre-defined list of Docker Swarm stack <-]${DEF}"
   echo
-  echo -e "SYNTAX: # dsb ${CYN}stack_name${DEF}"
-  echo -e "SYNTAX: # dsb -${CYN}option${DEF}"
+  echo -e "SYNTAX: # dsb ${cyn}stack_name${DEF}"
+  echo -e "SYNTAX: # dsb -${cyn}option${DEF}"
   echo -e "  VALID OPTIONS:"
-  echo -e "        -${CYN}all${DEF}          Bounces all stacks with a corresponding folder inside the '${YLW}${swarm_configs}/${DEF}' path."
-  echo -e "        -${CYN}listed${DEF}       Bounces the 'listed' array of stacks defined in '${YLW}${swarm_configs}/${CYN}swarm_stacks.conf${DEF}'"
-  echo -e "        -${CYN}default${DEF}      Bounces the 'default' array of stacks defined in '${YLW}${swarm_configs}/${CYN}swarm_stacks.conf${DEF}'"
-  echo -e "        -${CYN}h${DEF} || -${CYN}help${DEF}   Displays this help message."
+  echo -e "        -${cyn}all${DEF}        │ Bounces all stacks with a corresponding folder inside the '${YLW}${swarm_configs}/${DEF}' path."
+  echo -e "        -${cyn}listed${DEF}     │ Bounces the 'listed' array of stacks defined in '${YLW}${docker_vars}/${cyn}swarm_stacks.conf${DEF}'"
+  echo -e "        -${cyn}default${DEF}    │ Bounces the 'default' array of stacks defined in '${YLW}${docker_vars}/${cyn}swarm_stacks.conf${DEF}'"
+  echo -e "        -${cyn}h${DEF} │ -${cyn}help${DEF} │ Displays this help message."
   echo
   exit 1 # Exit script after printing help
   }
