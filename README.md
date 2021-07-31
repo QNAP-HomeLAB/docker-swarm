@@ -1,4 +1,4 @@
-*** BE WARNED! THIS REPO IS UNDER ACTIVE DEVELOPMENT, AND PROBABLY WON'T WORK AS ANYTHING BUT SNIPPET EXAMPLES! ***
+***BE WARNED! THIS REPO IS UNDER ACTIVE DEVELOPMENT, AND PROBABLY WON'T WORK AS ANYTHING BUT SNIPPET EXAMPLES!***
 
 Please consider joining and contributing to the [QNAP Unofficial Discord](https://discord.gg/rnxUPMd).
 - You gain access to a community built around advice on everything QNAP.
